@@ -1,0 +1,25 @@
+Findr (Fast Inference of Networks from Directed Regulations) is a statistical
+inference tool for genetics. It predicts the probability of pairwise gene
+regulation probability based on gene expression level data. When genotype data
+is available for the best eQTLs, higher prediction accuracy can be achieved.
+The pairwise regulation probability is then applied for the reconstruction of
+gene regulation networks.
+
+Findr obtains much higher accuracy and faster speed than existing programs [1].
+This is due to the analytical and implementational advances. Findr library can
+be downloaded from [2].
+
+This package is the python interface of Findr library, downloadable from [3]. It
+requires Findr library to be pre-installed. Due to incompatibility issues of
+Cygwin with non-Cygwin programs, the python interface does not support Windows.
+The binary interface and R package are also provided for Findr, downloadable
+from [4] and [5] respectively. The binary interface supports Windows.
+
+A more detailed documentation of Findr can be found as doc.pdf.
+
+[1] Lingfei Wang and Tom Michoel. Improved microRNA target predictions from genetics
+    of gene expression data with Findr (submitted). 2016.
+[2] https://github.com/lingfeiwang/findr
+[3] https://github.com/lingfeiwang/findr-python
+[4] https://github.com/lingfeiwang/findr-bin
+[5] https://github.com/lingfeiwang/findr-R
