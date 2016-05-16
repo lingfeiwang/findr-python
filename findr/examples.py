@@ -1,21 +1,4 @@
-# Copyright 2016 Lingfei Wang
-# 
-# This file is part of Findr.
-# 
-# Findr is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# Findr is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-# 
-# You should have received a copy of the GNU Affero General Public License
-# along with Findr.  If not, see <http://www.gnu.org/licenses/>.
-# 
-"""Examples of findr"""
+"""Examples of findr. For geuvadis dataset, see findr.examples.geuvadis1 and findr.examples.geuvadis2"""
 
 def load_geuvadis_data():
 	"""Return: dict of 'dg','dt','dt2' as part of geuvadis data."""
