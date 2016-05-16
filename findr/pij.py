@@ -171,7 +171,7 @@ def rank_a(self,dt,dt2,nodiag=False):
 		raise ValueError('Wrong input shape')
 	ng=dt.shape[0]
 	nt=dt2.shape[0]
-	ns=dg.shape[1]
+	ns=dt.shape[1]
 	nd=1 if nodiag else 0
 	
 	if dt2.shape[1]!=ns:
