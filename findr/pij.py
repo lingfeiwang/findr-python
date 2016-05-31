@@ -57,8 +57,10 @@ def gassist_a(self,dg,dt,dt2,na=None,nodiag=False):
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np,gtype_np
-	if dg.dtype.char!=gtype_np or dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
-		raise ValueError('Wrong input dtype')
+	if dg.dtype.char!=gtype_np:
+		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dtype.dtype.char+'!='+gtype_np)
+	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
+		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dg.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
 	ng=dg.shape[0]
@@ -125,8 +127,10 @@ def gassist_tot(self,dg,dt,dt2,na=None,nodiag=False):
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np,gtype_np
-	if dg.dtype.char!=gtype_np or dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
-		raise ValueError('Wrong input dtype')
+	if dg.dtype.char!=gtype_np:
+		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dtype.dtype.char+'!='+gtype_np)
+	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
+		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dg.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
 	ng=dg.shape[0]
@@ -172,7 +176,7 @@ def rank_a(self,dt,dt2,nodiag=False):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
-		raise ValueError('Wrong input dtype')
+		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
 	ng=dt.shape[0]
