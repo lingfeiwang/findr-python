@@ -79,7 +79,10 @@ def gassist_a(self,dg,dt,dt2,na=None,nodiag=False):
 	d2b=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
 	d2c=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
 	d3=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
-	ret=func(dg,dt,dt2,d1,d2b,d2c,d3,nvx,nd)
+	dgr=np.require(dg,requirements=['A','C','O','W'])
+	dtr=np.require(dt,requirements=['A','C','O','W'])
+	dt2r=np.require(dt2,requirements=['A','C','O','W'])
+	ret=func(dgr,dtr,dt2r,d1,d2b,d2c,d3,nvx,nd)
 	ans={'ret':ret,'p1':d1,'p2b':d2b,'p2c':d2c,'p3':d3}
 	return ans
 
@@ -143,7 +146,10 @@ def gassist_tot(self,dg,dt,dt2,na=None,nodiag=False):
 	d2b=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
 	d2c=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
 	d3=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
-	ret=func(dg,dt,dt2,d1,d2b,d2c,d3,nvx,nd)
+	dgr=np.require(dg,requirements=['A','C','O','W'])
+	dtr=np.require(dt,requirements=['A','C','O','W'])
+	dt2r=np.require(dt2,requirements=['A','C','O','W'])
+	ret=func(dgr,dtr,dt2r,d1,d2b,d2c,d3,nvx,nd)
 	ans={'ret':ret,'p1':d1,'p2b':d2b,'p2c':d2c,'p3':d3}
 	return ans
 
@@ -181,7 +187,9 @@ def rank_a(self,dt,dt2,nodiag=False):
 
 	func=self.cfunc('pij_rank_a',rettype='int',argtypes=['const MATRIXF*','const MATRIXF*','MATRIXF*','byte'])
 	dp=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
-	ret=func(dt,dt2,dp,nd)
+	dtr=np.require(dt,requirements=['A','C','O','W'])
+	dt2r=np.require(dt2,requirements=['A','C','O','W'])
+	ret=func(dtr,dt2r,dp,nd)
 	ans={'ret':ret,'p':dp}
 	return ans
 
