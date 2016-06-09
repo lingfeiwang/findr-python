@@ -58,7 +58,7 @@ class lib:
 				lv=libversion()
 				pv='.'.join(map(str,version))
 				if((ln!=pkgname) or (lv!=pv)):
-					print 'Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped.'
+					print 'Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped. Please update library or python interface.'
 					lib=None
 					continue
 				lib.lib_init(ctypes.c_ubyte(loglv),ctypes.c_ulong(rs),ctypes.c_ulong(nth))
