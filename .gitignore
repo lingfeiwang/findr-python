@@ -1,3 +1,4 @@
 dist/
 findr.egg-info/
 **.pyc
+Makefile
