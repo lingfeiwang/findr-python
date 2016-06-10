@@ -20,25 +20,27 @@
 import ctypes as c
 import numpy as np
 from .common import *
+from .osdepend import typesizet,npulong
 from exceptions import ValueError
+
 class blockf(c.Structure):
-	_fields_=[("size",c.c_ulong),("data",ftype_p)]
+	_fields_=[("size",typesizet),("data",ftype_p)]
 
 class vectorf(c.Structure):
-	_fields_=[("size",c.c_ulong),("stride",c.c_ulong),("data",ftype_p),("block",c.POINTER(blockf)),("owner",c.c_int)]
+	_fields_=[("size",typesizet),("stride",typesizet),("data",ftype_p),("block",c.POINTER(blockf)),("owner",c.c_int)]
 
 class matrixf(c.Structure):
-	_fields_=[("size1",c.c_ulong),("size2",c.c_ulong),("tda",c.c_ulong),("data",ftype_p),("block",c.POINTER(blockf)),("owner",c.c_int)]
+	_fields_=[("size1",typesizet),("size2",typesizet),("tda",typesizet),("data",ftype_p),("block",c.POINTER(blockf)),("owner",c.c_int)]
 
 
 class blockg(c.Structure):
-	_fields_=[("size",c.c_ulong),("data",gtype_p)]
+	_fields_=[("size",typesizet),("data",gtype_p)]
 
 class vectorg(c.Structure):
-	_fields_=[("size",c.c_ulong),("stride",c.c_ulong),("data",gtype_p),("block",c.POINTER(blockg)),("owner",c.c_int)]
+	_fields_=[("size",typesizet),("stride",typesizet),("data",gtype_p),("block",c.POINTER(blockg)),("owner",c.c_int)]
 
 class matrixg(c.Structure):
-	_fields_=[("size1",c.c_ulong),("size2",c.c_ulong),("tda",c.c_ulong),("data",gtype_p),("block",c.POINTER(blockg)),("owner",c.c_int)]
+	_fields_=[("size1",typesizet),("size2",typesizet),("tda",typesizet),("data",gtype_p),("block",c.POINTER(blockg)),("owner",c.c_int)]
 
 def vectorf_pin(d0,req=['A','C','W']):
 	if len(d0.shape)!=1:
@@ -47,7 +49,7 @@ def vectorf_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockf(c.c_ulong(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(ftype_p))
+	sb=blockf(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(ftype_p))
 	sv=vectorf(d.ctypes.shape[0],
 		d.ctypes.strides[0]/d.dtype.type().nbytes,
 		d.ctypes.data_as(ftype_p),
@@ -67,7 +69,7 @@ def matrixf_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockf(c.c_ulong(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(ftype_p))
+	sb=blockf(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(ftype_p))
 	sv=matrixf(d.ctypes.shape[0],
 		d.ctypes.shape[1],
 		d.ctypes.strides[0]/nb,
@@ -87,7 +89,7 @@ def vectorg_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockg(c.c_ulong(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(gtype_p))
+	sb=blockg(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(gtype_p))
 	sv=vectorg(d.ctypes.shape,
 		d.ctypes.strides[0]/d.dtype.type().nbytes,
 		d.ctypes.data_as(gtype_p),
@@ -107,7 +109,7 @@ def matrixg_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockg(c.c_ulong(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(gtype_p))
+	sb=blockg(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(gtype_p))
 	sv=matrixg()
 	sv=matrixg(d.ctypes.shape[0],
 		d.ctypes.shape[1],
@@ -136,7 +138,8 @@ class varpipe:
 vp_byte=varpipe(c.c_byte,lambda x:x)
 vp_int=varpipe(c.c_int,lambda x:x)
 vp_ulong=varpipe(c.c_ulong,lambda x:x)
-vp_sizet=vp_ulong
+vp_ulonglong=varpipe(typesizet,lambda x:x)
+vp_sizet=varpipe(typesizet,lambda x:x)
 vp_void=varpipe(lambda x:None,lambda x:None)
 vp_char_p=varpipe(c.c_char_p,lambda x:x.value)
 vp_vectorf=varpipe(vectorf_pin,vectorf_pout)
@@ -151,8 +154,8 @@ vp_matrixcg=varpipe(lambda x:matrixg_pin(x,req=['A','C']),matrixg_pout)
 vmap={
 	'byte':('i1',c.c_byte,vp_byte),
 	'int':('<i8',c.c_int,vp_int),
-	'unsigned long':('<u8',c.c_ulong,vp_ulong),
-	'size_t':('<u8',c.c_ulong,vp_sizet),
+	'unsigned long':(npulong,c.c_ulong,vp_ulong),
+	'size_t':('<u8',typesizet,vp_sizet),
 	'void':('u0',None,vp_void),
 	'char*':(None,c.c_char_p,vp_char_p),
 	'VECTORF*':(ftype_np,c.POINTER(vectorf),vp_vectorf),
