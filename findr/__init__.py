@@ -21,7 +21,7 @@ For examples, see: findr.examples.
 """
 
 import ctypes
-__all__=["auto","common","pij","types"]
+__all__=["auto","common","pij","osdepend","types"]
 from . import pij
 
 class lib:
@@ -29,7 +29,12 @@ class lib:
 	def default_libpaths():
 		from .common import lpaths,libfname
 		from os.path import join as pjoin
-		return map(lambda x:pjoin(x,libfname),lpaths)
+		from os import environ
+		if 'WINDIR' in environ:
+			lp=[pjoin(environ['WINDIR'],'System32')]+lpaths
+		else:
+			lp=lpaths
+		return map(lambda x:pjoin(x,libfname),lp)
 	def __init__(self,path=None,loglv=6,rs=0,nth=0):
 		"""Links and initializes shared library.
 		path:	Extra exact file location for shared library
@@ -40,6 +45,7 @@ class lib:
 		self.lib=None
 		from exceptions import ValueError, OSError
 		from .auto import pkgname,version
+		from .osdepend import fdll,typesizet
 		if type(rs) is not int or type(loglv) is not int or type(nth) is not int:
 			raise ValueError('Wrong input type')
 		if loglv<0 or loglv>12:
@@ -51,17 +57,17 @@ class lib:
 			paths=[path]+paths
 		for p in paths:
 			try:
-				lib=ctypes.CDLL(p)
+				lib=fdll(p)
 				libname=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_name',lib))
 				libversion=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_version',lib))
 				ln=libname()
 				lv=libversion()
 				pv='.'.join(map(str,version))
 				if((ln!=pkgname) or (lv!=pv)):
-					print 'Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped.'
+					print 'Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped. Please update library or python interface.'
 					lib=None
 					continue
-				lib.lib_init(ctypes.c_ubyte(loglv),ctypes.c_ulong(rs),ctypes.c_ulong(nth))
+				lib.lib_init(ctypes.c_ubyte(loglv),ctypes.c_ulong(rs),typesizet(nth))
 			except:
 				lib=None
 				continue
