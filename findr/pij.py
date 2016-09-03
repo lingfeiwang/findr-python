@@ -17,10 +17,9 @@
 # 
 """Python interface"""
 
-
-def gassist_a(self,dg,dt,dt2,na=None,nodiag=False):
+def _gassists_any(self,dg,dt,dt2,name,na=None,nodiag=False):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
-	with the model E(A)->A->B, by converting log likelihoods into probabilities per A for all B.
+	with multiple tests, by converting log likelihoods into probabilities per A for all B.
 	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
 		Entry dg[i,j] is genotype i's value for sample j.
 		Each value must be among 0,1,...,na.
@@ -33,6 +32,7 @@ def gassist_a(self,dg,dt,dt2,na=None,nodiag=False):
 		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
 		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
 		set parameter nodiag = 1.
+	name:	actual C function name to call 
 	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
 		determined as the maximum of dg.
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
@@ -43,12 +43,14 @@ def gassist_a(self,dg,dt,dt2,na=None,nodiag=False):
 		Test 1 calculates E(A)->A v.s. E(A)  A. The earlier one is preferred.
 		Since the program already expects significant eQTLs as input, p1 is
 		set to constant 1 for all A.
-	p2b:numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 2 bold.
-		Test 2 bold calculates E(A)->A->B with E(A)->B v.s. E(A)->A  B. The earlier one is preferred.
-	p2c:numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 2 conservative.
-		Test 2 conservative calculates E(A)->A->B with E(A)->B v.s. E(A)->A<-B. The earlier one is preferred.
+	p2:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 2.
+		Test 2 calculates E(A)->A--B with E(A)->B v.s. E(A)->A<-B. The earlier one is preferred.
 	p3:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 3.
 		Test 3 calculates E(A)->A--B with E(A)->B v.s. E(A)->A->B. The latter one is preferred.
+	p4:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 4.
+		Test 4 calculates E(A)->A--B with E(A)->B v.s. E(A)->A  B. The earlier one is preferred.
+	p5:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 5.
+		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A. The earlier one is preferred.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
 	"""
@@ -76,21 +78,64 @@ def gassist_a(self,dg,dt,dt2,na=None,nodiag=False):
 	if np.isnan(dt).sum()+np.isnan(dt2).sum()>0:
 		raise ValueError('NaN found.')
 
-	func=self.cfunc('pijs_gassist_a',rettype='int',argtypes=['const MATRIXG*','const MATRIXF*','const MATRIXF*','VECTORF*','MATRIXF*','MATRIXF*','MATRIXF*','size_t','byte'])
+	func=self.cfunc(name,rettype='int',argtypes=['const MATRIXG*','const MATRIXF*','const MATRIXF*','VECTORF*','MATRIXF*','MATRIXF*','MATRIXF*','MATRIXF*','size_t','byte'])
 	d1=np.require(np.zeros(ng,dtype=dt.dtype),requirements=['A','C','O','W'])
-	d2b=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
-	d2c=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
+	d2=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
 	d3=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
+	d4=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
+	d5=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
 	dgr=np.require(dg,requirements=['A','C','O','W'])
 	dtr=np.require(dt,requirements=['A','C','O','W'])
 	dt2r=np.require(dt2,requirements=['A','C','O','W'])
-	ret=func(dgr,dtr,dt2r,d1,d2b,d2c,d3,nvx,nd)
-	ans={'ret':ret,'p1':d1,'p2b':d2b,'p2c':d2c,'p3':d3}
+	ret=func(dgr,dtr,dt2r,d1,d2,d3,d4,d5,nvx,nd)
+	ans={'ret':ret,'p1':d1,'p2':d2,'p3':d3,'p4':d4,'p5':d5}
 	return ans
 
-def gassist_tot(self,dg,dt,dt2,na=None,nodiag=False):
+def gassists_a(self,dg,dt,dt2,na=None,nodiag=False):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
-	with the model E(A)->A->B, by converting log likelihoods into probabilities altogether.
+	with multiple tests, by converting log likelihoods into probabilities per A for all B.
+	Probabilities are converted from likelihood ratios separately for each A. This gives better
+	predictions when the number of secondary targets (dt2) is large. (Check program warnings.)
+	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+		Entry dg[i,j] is genotype i's value for sample j.
+		Each value must be among 0,1,...,na.
+		Genotype i must be best (and significant) eQTL of gene i (in dt).
+	dt:	numpy.ndarray(ng,ns,dtype=ftype(='<f4' by default)) Gene expression data for A
+		Entry dt[i,j] is gene i's expression level for sample j.
+		Genotype i (in dg) must be best (and significant) eQTL of gene i.
+	dt2:numpy.ndarray(nt,ns,dtype=ftype(='<f4' by default)) Gene expression data for B.
+		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
+		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
+		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		set parameter nodiag = 1.
+	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
+		determined as the maximum of dg.
+	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
+		This should be set to True when A is a subset of B and aligned correspondingly.
+	Return:	dictionary with following keys:
+	ret:0 iff execution succeeded.
+	p1:	numpy.ndarray(ng,dtype=ftype(='<f4' by default)). Probability for test 1.
+		Test 1 calculates E(A)->A v.s. E(A)  A. The earlier one is preferred.
+		Since the program already expects significant eQTLs as input, p1 is
+		set to constant 1 for all A.
+	p2:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 2.
+		Test 2 calculates E(A)->A--B with E(A)->B v.s. E(A)->A<-B. The earlier one is preferred.
+	p3:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 3.
+		Test 3 calculates E(A)->A--B with E(A)->B v.s. E(A)->A->B. The latter one is preferred.
+	p4:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 4.
+		Test 4 calculates E(A)->A--B with E(A)->B v.s. E(A)->A  B. The earlier one is preferred.
+	p5:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 5.
+		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A. The earlier one is preferred.
+	For more information on tests, see paper.
+	ftype and gtype can be found in auto.py.
+	"""
+	return _gassists_any(self,dg,dt,dt2,"pijs_gassist_a",na=na,nodiag=nodiag)
+
+def gassists_tot(self,dg,dt,dt2,na=None,nodiag=False):
+	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
+	with multiple tests, by converting log likelihoods into probabilities per A for all B.
+	Probabilities are converted from likelihood ratios all at once. This gives better
+	predictions when the number of secondary targets (dt2) is small. (Check program warnings.)
 	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
 		Entry dg[i,j] is genotype i's value for sample j.
 		Each value must be among 0,1,...,nv-1.
@@ -113,12 +158,44 @@ def gassist_tot(self,dg,dt,dt2,na=None,nodiag=False):
 		Test 1 calculates E(A)->A v.s. E(A)  A. The earlier one is preferred.
 		Since the program already expects significant eQTLs as input, p1 is
 		set to constant 1 for all A.
-	p2b:numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 2 bold.
-		Test 2 bold calculates E(A)->A->B with E(A)->B v.s. E(A)->A  B. The earlier one is preferred.
-	p2c:numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 2 conservative.
-		Test 2 conservative calculates E(A)->A->B with E(A)->B v.s. E(A)->A<-B. The earlier one is preferred.
+	p2:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 2.
+		Test 2 calculates E(A)->A--B with E(A)->B v.s. E(A)->A<-B. The earlier one is preferred.
 	p3:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 3.
 		Test 3 calculates E(A)->A--B with E(A)->B v.s. E(A)->A->B. The latter one is preferred.
+	p4:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 4.
+		Test 4 calculates E(A)->A--B with E(A)->B v.s. E(A)->A  B. The earlier one is preferred.
+	p5:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)). Probability for test 5.
+		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A. The earlier one is preferred.
+	For more information on tests, see paper.
+	ftype and gtype can be found in auto.py.
+	"""
+	return _gassists_any(self,dg,dt,dt2,"pijs_gassist_tot",na=na,nodiag=nodiag)
+
+
+def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False):
+	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
+	with the recommended combination of multiple tests.
+	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+		Entry dg[i,j] is genotype i's value for sample j.
+		Each value must be among 0,1,...,na.
+		Genotype i must be best (and significant) eQTL of gene i (in dt).
+	dt:	numpy.ndarray(ng,ns,dtype=ftype(='<f4' by default)) Gene expression data for A
+		Entry dt[i,j] is gene i's expression level for sample j.
+		Genotype i (in dg) must be best (and significant) eQTL of gene i.
+	dt2:numpy.ndarray(nt,ns,dtype=ftype(='<f4' by default)) Gene expression data for B.
+		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
+		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
+		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		set parameter nodiag = 1.
+	name:	actual C function name to call 
+	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
+		determined as the maximum of dg.
+	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
+		This should be set to True when A is a subset of B and aligned correspondingly.
+	Return:	dictionary with following keys:
+	ret:0 iff execution succeeded.
+	p:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)).
+		Probability function from for recommended combination of multiple tests.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
 	"""
@@ -138,24 +215,83 @@ def gassist_tot(self,dg,dt,dt2,na=None,nodiag=False):
 	ns=dg.shape[1]
 	nvx=na+1 if na else dg.max()+1
 	nd=1 if nodiag else 0
+	
 	if nvx<2:
 		raise ValueError('Invalid genotype values')
 	if dt.shape!=dg.shape or dt2.shape[1]!=ns:
 		raise ValueError('Wrong input shape')
 	if np.isnan(dt).sum()+np.isnan(dt2).sum()>0:
 		raise ValueError('NaN found.')
-		
-	func=self.cfunc('pijs_gassist_tot',rettype='int',argtypes=['const MATRIXG*','const MATRIXF*','const MATRIXF*','VECTORF*','MATRIXF*','MATRIXF*','MATRIXF*','size_t','byte'])
-	d1=np.require(np.zeros(ng,dtype=dt.dtype),requirements=['A','C','O','W'])
-	d2b=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
-	d2c=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
-	d3=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
+
+	func=self.cfunc(name,rettype='int',argtypes=['const MATRIXG*','const MATRIXF*','const MATRIXF*','MATRIXF*','size_t','byte'])
+	d=np.require(np.zeros((ng,nt),dtype=dt.dtype),requirements=['A','C','O','W'])
 	dgr=np.require(dg,requirements=['A','C','O','W'])
 	dtr=np.require(dt,requirements=['A','C','O','W'])
 	dt2r=np.require(dt2,requirements=['A','C','O','W'])
-	ret=func(dgr,dtr,dt2r,d1,d2b,d2c,d3,nvx,nd)
-	ans={'ret':ret,'p1':d1,'p2b':d2b,'p2c':d2c,'p3':d3}
+	ret=func(dgr,dtr,dt2r,d,nvx,nd)
+	ans={'ret':ret,'p':d}
 	return ans
+
+def gassist_a(self,dg,dt,dt2,na=None,nodiag=False):
+	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
+	with the recommended combination of multiple tests.
+	Probabilities are converted from likelihood ratios separately for each A. This gives better
+	predictions when the number of secondary targets (dt2) is large. (Check program warnings.)
+	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+		Entry dg[i,j] is genotype i's value for sample j.
+		Each value must be among 0,1,...,na.
+		Genotype i must be best (and significant) eQTL of gene i (in dt).
+	dt:	numpy.ndarray(ng,ns,dtype=ftype(='<f4' by default)) Gene expression data for A
+		Entry dt[i,j] is gene i's expression level for sample j.
+		Genotype i (in dg) must be best (and significant) eQTL of gene i.
+	dt2:numpy.ndarray(nt,ns,dtype=ftype(='<f4' by default)) Gene expression data for B.
+		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
+		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
+		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		set parameter nodiag = 1.
+	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
+		determined as the maximum of dg.
+	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
+		This should be set to True when A is a subset of B and aligned correspondingly.
+	Return:	dictionary with following keys:
+	ret:0 iff execution succeeded.
+	p:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)).
+		Probability function from for recommended combination of multiple tests.
+	For more information on tests, see paper.
+	ftype and gtype can be found in auto.py.
+	"""
+	return _gassist_any(self,dg,dt,dt2,"pij_gassist_a",na=na,nodiag=nodiag)
+
+def gassist_tot(self,dg,dt,dt2,na=None,nodiag=False):
+	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
+	with the recommended combination of multiple tests.
+	Probabilities are converted from likelihood ratios all at once. This gives better
+	predictions when the number of secondary targets (dt2) is small. (Check program warnings.)
+	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+		Entry dg[i,j] is genotype i's value for sample j.
+		Each value must be among 0,1,...,na.
+		Genotype i must be best (and significant) eQTL of gene i (in dt).
+	dt:	numpy.ndarray(ng,ns,dtype=ftype(='<f4' by default)) Gene expression data for A
+		Entry dt[i,j] is gene i's expression level for sample j.
+		Genotype i (in dg) must be best (and significant) eQTL of gene i.
+	dt2:numpy.ndarray(nt,ns,dtype=ftype(='<f4' by default)) Gene expression data for B.
+		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
+		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
+		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		set parameter nodiag = 1.
+	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
+		determined as the maximum of dg.
+	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
+		This should be set to True when A is a subset of B and aligned correspondingly.
+	Return:	dictionary with following keys:
+	ret:0 iff execution succeeded.
+	p:	numpy.ndarray((ng,nt),dtype=ftype(='<f4' by default)).
+		Probability function from for recommended combination of multiple tests.
+	For more information on tests, see paper.
+	ftype and gtype can be found in auto.py.
+	"""
+	return _gassist_any(self,dg,dt,dt2,"pij_gassist_tot",na=na,nodiag=nodiag)
+
 
 def rank_a(self,dt,dt2,nodiag=False):
 	"""Calculates probability of gene i correlating with gene j by converting log likelihoods into probabilities per A for all B.

@@ -48,7 +48,7 @@ def geuvadis2():
 	lines=['import findr,findr.examples',
 		'l=findr.lib(loglv=12)',
 		'd=findr.examples.load_geuvadis_data()',
-		'ans=l.pijs_gassist_a(d["dg"],d["dt"],d["dt2"])']
+		'ans=l.pij_gassist_a(d["dg"],d["dt"],d["dt2"])']
 	for line in lines:
 		print '# '+line
 		exec line

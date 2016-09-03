@@ -64,7 +64,7 @@ class lib:
 				lv=libversion()
 				pv='.'.join(map(str,version))
 				if((ln!=pkgname) or (lv!=pv)):
-					print 'Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped. Please update library or python interface.'
+					print 'Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped.'
 					lib=None
 					continue
 				lib.lib_init(ctypes.c_ubyte(loglv),ctypes.c_ulong(rs),typesizet(nth))
@@ -73,7 +73,7 @@ class lib:
 				continue
 			break
 		if lib is None:
-			raise OSError("Library not found.")
+			raise OSError("Library not found at default path. Please install/update "+pkgname+' library and python interface, or set library path manually.')
 		self.lib=lib
 	def cfunc(self,*a,**ka):
 		from exceptions import ValueError
@@ -81,7 +81,9 @@ class lib:
 			raise ValueError("Not initialized.")
 		from .types import cfunc
 		return cfunc(self.lib,*a,**ka)
-	pijs_gassist_a=pij.gassist_a
-	pijs_gassist_tot=pij.gassist_tot
+	pij_gassist_a=pij.gassist_a
+	pij_gassist_tot=pij.gassist_tot
 	pij_rank_a=pij.rank_a
+	pijs_gassist_a=pij.gassists_a
+	pijs_gassist_tot=pij.gassists_tot
 
