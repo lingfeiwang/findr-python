@@ -2,7 +2,7 @@ import os
 lpaths=["/usr/local/lib"]
 pkgname="findr"
 libfname="libfindr.so"
-version=[0,3,0]
+version=[0,4,0]
 ftype_np="f"
 ftype_c="c_float"
 gtype_np="B"

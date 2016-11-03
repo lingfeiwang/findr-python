@@ -4,9 +4,9 @@ Findr obtains much higher accuracy and faster speed than existing programs [1]. 
 
 This package is the python interface of Findr library, downloadable from [3]. It requires Findr library to be pre-installed. The binary interface and R package are also provided for Findr, downloadable from [4] and [5] respectively.
 
-A more detailed documentation of Findr can be found as doc.pdf.
+A more detailed documentation of Findr can be found as doc.pdf. For the list of updates, see UPDATES in [2].
 
-[1] Lingfei Wang and Tom Michoel. (In preparation). 2016.
+[1] Lingfei Wang and Tom Michoel, Efficient causal inference with hidden confounders from genome-transcriptome variation data (In preparation). 2016.
 [2] https://github.com/lingfeiwang/findr
 [3] https://github.com/lingfeiwang/findr-python
 [4] https://github.com/lingfeiwang/findr-bin

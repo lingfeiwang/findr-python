@@ -153,9 +153,9 @@ vp_matrixcg=varpipe(lambda x:matrixg_pin(x,req=['A','C']),matrixg_pout)
 
 vmap={
 	'byte':('i1',c.c_byte,vp_byte),
-	'int':('<i8',c.c_int,vp_int),
+	'int':('i8',c.c_int,vp_int),
 	'unsigned long':(npulong,c.c_ulong,vp_ulong),
-	'size_t':('<u8',typesizet,vp_sizet),
+	'size_t':('u8',typesizet,vp_sizet),
 	'void':('u0',None,vp_void),
 	'char*':(None,c.c_char_p,vp_char_p),
 	'VECTORF*':(ftype_np,c.POINTER(vectorf),vp_vectorf),

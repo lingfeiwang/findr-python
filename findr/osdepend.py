@@ -21,10 +21,10 @@ import ctypes
 if system()=='Darwin' or system()=='Linux':
 	fdll=ctypes.CDLL
 	typesizet=ctypes.c_ulong
-	npulong='<u8'
+	npulong='=u8'
 elif system()=='Windows':
 	fdll=ctypes.WinDLL
 	typesizet=ctypes.c_ulonglong
-	npulong='<u4'
+	npulong='=u4'
 else:
 	raise OSError("Unsupported operating system.")

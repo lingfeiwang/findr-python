@@ -81,9 +81,36 @@ class lib:
 			raise ValueError("Not initialized.")
 		from .types import cfunc
 		return cfunc(self.lib,*a,**ka)
-	pij_gassist_a=pij.gassist_a
-	pij_gassist_tot=pij.gassist_tot
-	pij_rank_a=pij.rank_a
-	pijs_gassist_a=pij.gassists_a
-	pijs_gassist_tot=pij.gassists_tot
+	pij_gassist=pij.gassist
+	pij_gassist_trad=pij.gassist_trad
+	pijs_gassist=pij.gassists
+	pij_rank=pij.rank
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
