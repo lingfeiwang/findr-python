@@ -6,7 +6,7 @@ This package is the python interface of Findr library, downloadable from [3]. It
 
 A more detailed documentation of Findr can be found as doc.pdf. For the list of updates, see UPDATES in [2].
 
-[1] Lingfei Wang and Tom Michoel, Efficient causal inference with hidden confounders from genome-transcriptome variation data (In preparation). 2016.
+[1] Lingfei Wang and Tom Michoel, Efficient causal inference with hidden confounders from genome-transcriptome variation data (In preparation). 2016. https://arxiv.org/abs/1611.01114
 [2] https://github.com/lingfeiwang/findr
 [3] https://github.com/lingfeiwang/findr-python
 [4] https://github.com/lingfeiwang/findr-bin

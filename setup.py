@@ -26,7 +26,7 @@ def pkg_setup():
 		download_url=url,
 		include_package_data=True,
 		install_requires=['numpy'],
-		classifiers=['Development Status :: 3 - Alpha',
+		classifiers=['Development Status :: 4 - Beta Development Status',
 			'Environment :: Console',
 			'Intended Audience :: End Users/Desktop',
 			'Intended Audience :: Education',
