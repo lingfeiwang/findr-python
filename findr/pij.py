@@ -1,4 +1,4 @@
-# Copyright 2016 Lingfei Wang
+# Copyright 2016, 2017 Lingfei Wang
 # 
 # This file is part of Findr.
 # 
@@ -20,17 +20,17 @@
 def _gassists_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
 	with multiple tests, by converting log likelihoods into probabilities per A for all B.
-	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
 		Entry dg[i,j] is genotype i's value for sample j.
 		Each value must be among 0,1,...,na.
 		Genotype i must be best (and significant) eQTL of gene i (in dt).
-	dt:	numpy.ndarray(ng,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
+	dt:	numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
 		Entry dt[i,j] is gene i's expression level for sample j.
 		Genotype i (in dg) must be best (and significant) eQTL of gene i.
-	dt2:numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
+	dt2:numpy.ndarray(nt2,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
 		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
 		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
-		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		to be identical with dt at its upper submatrix, i.e. dt2[:nt,:]=dt, and
 		set parameter nodiag = 1.
 	name:	actual C function name to call 
 	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
@@ -40,18 +40,18 @@ def _gassists_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
-	p1:	numpy.ndarray(ng,dtype=ftype(='=f4' by default)). Probability for test 1.
+	p1:	numpy.ndarray(nt,dtype=ftype(='=f4' by default)). Probability for test 1.
 		Test 1 calculates E(A)->A v.s. E(A)  A. The earlier one is preferred.
 		For nodiag=False, because the function expects significant eQTLs, p1 always return 1.
 		For nodiag=True, uses diagonal elements of p2.
 		Consider replacing p1 with your own (1-FDR) from eQTL discovery.
-	p2:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)). Probability for test 2.
+	p2:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for test 2.
 		Test 2 calculates E(A)->A--B with E(A)->B v.s. E(A)->A<-B. The earlier one is preferred.
-	p3:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)). Probability for test 3.
+	p3:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for test 3.
 		Test 3 calculates E(A)->A--B with E(A)->B v.s. E(A)->A->B. The latter one is preferred.
-	p4:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)). Probability for test 4.
+	p4:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for test 4.
 		Test 4 calculates E(A)->A--B with E(A)->B v.s. E(A)->A  B. The earlier one is preferred.
-	p5:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)). Probability for test 5.
+	p5:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for test 5.
 		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A. The earlier one is preferred.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
@@ -109,17 +109,17 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	with multiple tests, by converting log likelihoods into probabilities per A for all B.
 	Probabilities are converted from likelihood ratios separately for each A. This gives better
 	predictions when the number of secondary targets (dt2) is large. (Check program warnings.)
-	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
 		Entry dg[i,j] is genotype i's value for sample j.
 		Each value must be among 0,1,...,na.
 		Genotype i must be best (and significant) eQTL of gene i (in dt).
-	dt:	numpy.ndarray(ng,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
+	dt:	numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
 		Entry dt[i,j] is gene i's expression level for sample j.
 		Genotype i (in dg) must be best (and significant) eQTL of gene i.
-	dt2:numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
+	dt2:numpy.ndarray(nt2,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
 		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
 		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
-		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		to be identical with dt at its upper submatrix, i.e. dt2[:nt,:]=dt, and
 		set parameter nodiag = 1.
 	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
 		determined as the maximum of dg.
@@ -128,18 +128,18 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
-	p1:	numpy.ndarray(ng,dtype=ftype(='=f4' by default)). Probability for test 1.
+	p1:	numpy.ndarray(nt,dtype=ftype(='=f4' by default)). Probability for test 1.
 		Test 1 calculates E(A)->A v.s. E(A)  A. The earlier one is preferred.
 		For nodiag=False, because the function expects significant eQTLs, p1 always return 1.
 		For nodiag=True, uses diagonal elements of p2.
 		Consider replacing p1 with your own (1-FDR) from eQTL discovery.
-	p2:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)). Probability for test 2.
+	p2:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for test 2.
 		Test 2 calculates E(A)->A--B with E(A)->B v.s. E(A)->A<-B. The earlier one is preferred.
-	p3:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)). Probability for test 3.
+	p3:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for test 3.
 		Test 3 calculates E(A)->A--B with E(A)->B v.s. E(A)->A->B. The latter one is preferred.
-	p4:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)). Probability for test 4.
+	p4:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for test 4.
 		Test 4 calculates E(A)->A--B with E(A)->B v.s. E(A)->A  B. The earlier one is preferred.
-	p5:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)). Probability for test 5.
+	p5:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for test 5.
 		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A. The earlier one is preferred.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
@@ -149,17 +149,17 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
 	with the recommended combination of multiple tests.
-	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
 		Entry dg[i,j] is genotype i's value for sample j.
 		Each value must be among 0,1,...,na.
 		Genotype i must be best (and significant) eQTL of gene i (in dt).
-	dt:	numpy.ndarray(ng,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
+	dt:	numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
 		Entry dt[i,j] is gene i's expression level for sample j.
 		Genotype i (in dg) must be best (and significant) eQTL of gene i.
-	dt2:numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
+	dt2:numpy.ndarray(nt2,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
 		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
 		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
-		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		to be identical with dt at its upper submatrix, i.e. dt2[:nt,:]=dt, and
 		set parameter nodiag = 1.
 	name:	actual C function name to call 
 	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
@@ -169,7 +169,7 @@ def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
-	p:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)).
+	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
 		Probability function from for recommended combination of multiple tests.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
@@ -220,17 +220,17 @@ def gassist(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	with the recommended combination of multiple tests.
 	Probabilities are converted from likelihood ratios separately for each A. This gives better
 	predictions when the number of secondary targets (dt2) is large. (Check program warnings.)
-	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
 		Entry dg[i,j] is genotype i's value for sample j.
 		Each value must be among 0,1,...,na.
 		Genotype i must be best (and significant) eQTL of gene i (in dt).
-	dt:	numpy.ndarray(ng,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
+	dt:	numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
 		Entry dt[i,j] is gene i's expression level for sample j.
 		Genotype i (in dg) must be best (and significant) eQTL of gene i.
-	dt2:numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
+	dt2:numpy.ndarray(nt2,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
 		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
 		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
-		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		to be identical with dt at its upper submatrix, i.e. dt2[:nt,:]=dt, and
 		set parameter nodiag = 1.
 	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
 		determined as the maximum of dg.
@@ -239,7 +239,7 @@ def gassist(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
-	p:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)).
+	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
 		Probability function from for recommended combination of multiple tests.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
@@ -249,17 +249,17 @@ def gassist(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 def gassist_trad(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method with traditional test.
 	WARNING: This is not and is not intended as a loyal reimplementation of Trigger. This test does not include p1.
-	dg:	numpy.ndarray(ng,ns,dtype=gtype(='u1' by default)) Genotype data.
+	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
 		Entry dg[i,j] is genotype i's value for sample j.
 		Each value must be among 0,1,...,na.
 		Genotype i must be best (and significant) eQTL of gene i (in dt).
-	dt:	numpy.ndarray(ng,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
+	dt:	numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
 		Entry dt[i,j] is gene i's expression level for sample j.
 		Genotype i (in dg) must be best (and significant) eQTL of gene i.
-	dt2:numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
+	dt2:numpy.ndarray(nt2,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
 		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
 		When dt2 is a superset of (or identical with) dt, dt2 must be arranged
-		to be identical with dt at its upper submatrix, i.e. dt2[:ng,:]=dt, and
+		to be identical with dt at its upper submatrix, i.e. dt2[:nt,:]=dt, and
 		set parameter nodiag = 1.
 	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
 		determined as the maximum of dg.
@@ -268,7 +268,7 @@ def gassist_trad(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
-	p:	numpy.ndarray((ng,nt),dtype=ftype(='=f4' by default)).
+	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
 		Probability function from for recommended combination of multiple tests.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
