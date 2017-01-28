@@ -1,5 +1,7 @@
 For updates in functionality, see UPDATES in findr library.
 
+0.5.0:
+	New function: reconstruction of directed acyclic graph from prior information of edge significance in method netr_one_greedy. For details, see doc.pdf.
 0.4.1:
 	Minor updates on documentation.
 	Updated copyright.

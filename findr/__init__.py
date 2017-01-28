@@ -21,8 +21,8 @@ For examples, see: findr.examples.
 """
 
 import ctypes
-__all__=["auto","common","pij","osdepend","types"]
-from . import pij
+__all__=["auto","common","pij","netr","osdepend","types"]
+from . import pij, netr
 
 class lib:
 	@staticmethod	
@@ -85,6 +85,7 @@ class lib:
 	pij_gassist_trad=pij.gassist_trad
 	pijs_gassist=pij.gassists
 	pij_rank=pij.rank
+	netr_one_greedy=netr.one_greedy
 	
 	
 	

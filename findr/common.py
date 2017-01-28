@@ -24,3 +24,4 @@ gtype=getattr(c,gtype_c)
 
 ftype_p=c.POINTER(ftype)
 gtype_p=c.POINTER(gtype)
+c_ubyte_p=c.POINTER(c.c_ubyte)

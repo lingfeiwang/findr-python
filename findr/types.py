@@ -23,6 +23,15 @@ from .common import *
 from .osdepend import typesizet,npulong
 from exceptions import ValueError
 
+class blockuc(c.Structure):
+	_fields_=[("size",typesizet),("data",c_ubyte_p)]
+
+class vectoruc(c.Structure):
+	_fields_=[("size",typesizet),("stride",typesizet),("data",c_ubyte_p),("block",c.POINTER(blockuc)),("owner",c.c_int)]
+
+class matrixuc(c.Structure):
+	_fields_=[("size1",typesizet),("size2",typesizet),("tda",typesizet),("data",c_ubyte_p),("block",c.POINTER(blockuc)),("owner",c.c_int)]
+
 class blockf(c.Structure):
 	_fields_=[("size",typesizet),("data",ftype_p)]
 
@@ -32,7 +41,6 @@ class vectorf(c.Structure):
 class matrixf(c.Structure):
 	_fields_=[("size1",typesizet),("size2",typesizet),("tda",typesizet),("data",ftype_p),("block",c.POINTER(blockf)),("owner",c.c_int)]
 
-
 class blockg(c.Structure):
 	_fields_=[("size",typesizet),("data",gtype_p)]
 
@@ -41,6 +49,45 @@ class vectorg(c.Structure):
 
 class matrixg(c.Structure):
 	_fields_=[("size1",typesizet),("size2",typesizet),("tda",typesizet),("data",gtype_p),("block",c.POINTER(blockg)),("owner",c.c_int)]
+
+def vectoruc_pin(d0,req=['A','C','W']):
+	if len(d0.shape)!=1:
+		raise ValueError('Wrong input shape')
+	if d0.dtype.char!='B':
+		raise ValueError('Wrong input dtype')
+	d=np.require(d0,requirements=req)
+	nb=d.dtype.type().nbytes
+	sb=blockuc(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(c_ubyte_p))
+	sv=vectoruc(d.ctypes.shape[0],
+		d.ctypes.strides[0]/d.dtype.type().nbytes,
+		d.ctypes.data_as(c_ubyte_p),
+		c.pointer(sb),
+		0)
+	return sv
+def vectoruc_pout(d):
+	from exceptions import NotImplementedError
+	raise NotImplementedError
+
+def matrixuc_pin(d0,req=['A','C','W']):
+	import numpy as np
+	if len(d0.shape)!=2:
+		raise ValueError('Wrong input shape')
+	if d0.dtype.char!='B':
+		raise ValueError('Wrong input dtype')
+	d=np.require(d0,requirements=req)
+	nb=d.dtype.type().nbytes
+	sb=blockuc(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(c_ubyte_p))
+	sv=matrixuc(d.ctypes.shape[0],
+		d.ctypes.shape[1],
+		d.ctypes.strides[0]/nb,
+		d.ctypes.data_as(c_ubyte_p),
+		c.pointer(sb),
+		0)
+	return sv
+def matrixuc_pout(d):
+	from exceptions import NotImplementedError
+	raise NotImplementedError
+	
 
 def vectorf_pin(d0,req=['A','C','W']):
 	if len(d0.shape)!=1:
@@ -59,7 +106,6 @@ def vectorf_pin(d0,req=['A','C','W']):
 def vectorf_pout(d):
 	from exceptions import NotImplementedError
 	raise NotImplementedError
-
 
 def matrixf_pin(d0,req=['A','C','W']):
 	import numpy as np
@@ -81,7 +127,6 @@ def matrixf_pout(d):
 	from exceptions import NotImplementedError
 	raise NotImplementedError
 	
-
 def vectorg_pin(d0,req=['A','C','W']):
 	if len(d0.shape)!=1:
 		raise ValueError('Wrong input shape')
@@ -99,7 +144,6 @@ def vectorg_pin(d0,req=['A','C','W']):
 def vectorg_pout(d):
 	from exceptions import NotImplementedError
 	raise NotImplementedError
-
 
 def matrixg_pin(d0,req=['A','C','W']):
 	import numpy as np
@@ -146,6 +190,8 @@ vp_vectorf=varpipe(vectorf_pin,vectorf_pout)
 vp_matrixf=varpipe(matrixf_pin,matrixf_pout)
 vp_vectorg=varpipe(vectorg_pin,vectorg_pout)
 vp_matrixg=varpipe(matrixg_pin,matrixg_pout)
+vp_vectoruc=varpipe(vectoruc_pin,vectoruc_pout)
+vp_matrixuc=varpipe(matrixuc_pin,matrixuc_pout)
 vp_vectorcf=varpipe(lambda x:vectorf_pin(x,req=['A','C']),vectorf_pout)
 vp_matrixcf=varpipe(lambda x:matrixf_pin(x,req=['A','C']),matrixf_pout)
 vp_vectorcg=varpipe(lambda x:vectorg_pin(x,req=['A','C']),vectorg_pout)
@@ -160,6 +206,8 @@ vmap={
 	'char*':(None,c.c_char_p,vp_char_p),
 	'VECTORF*':(ftype_np,c.POINTER(vectorf),vp_vectorf),
 	'MATRIXF*':(ftype_np,c.POINTER(matrixf),vp_matrixf),
+	'VECTORUC*':('B',c.POINTER(vectoruc),vp_vectoruc),
+	'MATRIXUC*':('B',c.POINTER(matrixuc),vp_matrixuc),
 	'VECTORG*':(gtype_np,c.POINTER(vectorg),vp_vectorg),
 	'MATRIXG*':(gtype_np,c.POINTER(matrixg),vp_matrixg),
 	'const VECTORF*':(ftype_np,c.POINTER(vectorf),vp_vectorcf),
