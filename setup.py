@@ -1,6 +1,6 @@
 pkgname="findr"
 pkgnamefull="Fast Inference of Networks from Directed Regulations"
-version=[0,5,0]
+version=[1,0,0]
 license="AGPL-3"
 url="https://github.com/lingfeiwang/findr-python"
 urllib="https://github.com/lingfeiwang/findr"
@@ -26,7 +26,7 @@ def pkg_setup():
 		download_url=url,
 		include_package_data=True,
 		install_requires=['numpy'],
-		classifiers=['Development Status :: 4 - Beta Development Status',
+		classifiers=['Development Status :: 4 - Beta',
 			'Environment :: Console',
 			'Intended Audience :: End Users/Desktop',
 			'Intended Audience :: Education',

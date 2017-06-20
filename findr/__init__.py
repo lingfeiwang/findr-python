@@ -44,6 +44,7 @@ class lib:
 		"""
 		self.lib=None
 		from exceptions import ValueError, OSError
+		import logging
 		from .auto import pkgname,version
 		from .osdepend import fdll,typesizet
 		if type(rs) is not int or type(loglv) is not int or type(nth) is not int:
@@ -58,15 +59,18 @@ class lib:
 		for p in paths:
 			try:
 				lib=fdll(p)
-				libname=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_name',lib))
-				libversion=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_version',lib))
-				ln=libname()
-				lv=libversion()
+				ln=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_name',lib))()
+				lv=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_version',lib))()
+				lv1=ctypes.CFUNCTYPE(typesizet)(('lib_version1',lib))()
+				lv2=ctypes.CFUNCTYPE(typesizet)(('lib_version2',lib))()
+				lv3=ctypes.CFUNCTYPE(typesizet)(('lib_version3',lib))()
 				pv='.'.join(map(str,version))
-				if((ln!=pkgname) or (lv!=pv)):
-					print 'Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped.'
+				if((ln!=pkgname) or (lv1!=version[0]) or (lv2!=version[1])):
+					logging.warning('Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped.')
 					lib=None
 					continue
+				elif lv3!=version[2]:
+					logging.warning('Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+', but only at patch version. Loaded.')
 				lib.lib_init(ctypes.c_ubyte(loglv),ctypes.c_ulong(rs),typesizet(nth))
 			except:
 				lib=None
@@ -84,7 +88,13 @@ class lib:
 	pij_gassist=pij.gassist
 	pij_gassist_trad=pij.gassist_trad
 	pijs_gassist=pij.gassists
+	pijs_gassist_pv=pij.gassists_pv
+	pij_cassist=pij.cassist
+	pij_cassist_trad=pij.cassist_trad
+	pijs_cassist=pij.cassists
+	pijs_cassist_pv=pij.cassists_pv
 	pij_rank=pij.rank
+	pij_rank_pv=pij.rank_pv
 	netr_one_greedy=netr.one_greedy
 	
 	

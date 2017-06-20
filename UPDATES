@@ -1,5 +1,12 @@
-For updates in functionality, see UPDATES in findr library.
+For detailed updates in findr library functionality, see UPDATES in findr library.
 
+1.0.0:
+	New functions:
+		Included P-value computation for 4 tests in pijs_gassist_pv and correlation test in pij_rank_pv.
+		Included using continuous anchors (instead of discrete genotypes) for causal inference in pij(s)_cassist*.
+	Revisions:
+		Now allows to load libraries with a different patch version (but the major & minor versions must still remain the same with those of the interface).
+		Now also tries automatically to load Findr's shared library from ~/.local/lib.
 0.5.0:
 	New function: reconstruction of directed acyclic graph from prior information of edge significance in method netr_one_greedy. For details, see doc.pdf.
 0.4.1:

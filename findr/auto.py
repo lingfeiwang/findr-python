@@ -1,8 +1,8 @@
 import os
-lpaths=["/usr/local/lib"]
+lpaths=["/usr/local/lib",os.path.expanduser("~")+"/.local/lib"]
 pkgname="findr"
 libfname="libfindr.so"
-version=[0,5,0]
+version=[1,0,0]
 ftype_np="f"
 ftype_c="c_float"
 gtype_np="B"
