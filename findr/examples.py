@@ -55,15 +55,15 @@ def geuvadis2():
 	for line in lines:
 		print '# '+line
 		exec line
-	print '# return ans'
-	return ans
+	print '# return ans2'
+	return ans2
 
 def geuvadis3():
 	"""Example with geuvadis data with genotype information, but only computes p-values. Every line of execution is printed."""
 	lines=['import findr,findr.examples',
 		'l=findr.lib(loglv=12)',
 		'd=findr.examples.load_geuvadis_data()',
-		'ans1=l.pijs_gassist_pv(d["dg"],d["dt"],d["dt2"])']
+		'ans=l.pijs_gassist_pv(d["dg"],d["dt"],d["dt2"])']
 	for line in lines:
 		print '# '+line
 		exec line
@@ -80,8 +80,8 @@ def geuvadis4():
 	for line in lines:
 		print '# '+line
 		exec line
-	print '# return ans'
-	return ans
+	print '# return ans2'
+	return ans2
 	
 
 

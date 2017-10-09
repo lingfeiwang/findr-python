@@ -1,5 +1,7 @@
 For detailed updates in findr library functionality, see UPDATES in findr library.
 
+1.0.2:
+	Bug corrections in examples.		
 1.0.0:
 	New functions:
 		Included P-value computation for 4 tests in pijs_gassist_pv and correlation test in pij_rank_pv.
