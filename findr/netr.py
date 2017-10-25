@@ -41,6 +41,8 @@ def one_greedy(self,dp,namax=None,nimax=None,nomax=None):
 	net:	numpy.ndarray((nt,nt),dtype=bool). The reconstructed direct acyclic graph or network
 		net[i,j]=True if an edge from i to j exists in the reconstructed network, and False otherwise.
 	ftype and gtype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis7
 	"""
 	from exceptions import ValueError
 	if self.lib is None:

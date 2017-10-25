@@ -45,6 +45,8 @@ def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1):
 		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis6
 	"""
 	from exceptions import ValueError
 	if self.lib is None:
@@ -52,7 +54,7 @@ def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	if dg.dtype.char!=gtype_np:
-		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dtype.dtype.char+'!='+gtype_np)
+		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dg.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
@@ -129,6 +131,8 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A. The earlier one is preferred.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis4
 	"""
 	from exceptions import ValueError
 	if self.lib is None:
@@ -136,7 +140,7 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	if dg.dtype.char!=gtype_np:
-		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dtype.dtype.char+'!='+gtype_np)
+		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dg.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
@@ -211,7 +215,7 @@ def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	if dg.dtype.char!=gtype_np:
-		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dtype.dtype.char+'!='+gtype_np)
+		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dg.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
@@ -274,6 +278,8 @@ def gassist(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 		Probability function from for recommended combination of multiple tests.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis2, findr.examples.geuvadis3
 	"""
 	return _gassist_any(self,dg,dt,dt2,"pij_gassist",na=na,nodiag=nodiag,memlimit=memlimit)
 
@@ -303,6 +309,8 @@ def gassist_trad(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 		Probability function from for recommended combination of multiple tests.
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis2, findr.examples.geuvadis3 (same format)
 	"""
 	return _gassist_any(self,dg,dt,dt2,"pij_gassist_trad",na=na,nodiag=nodiag,memlimit=memlimit)
 
@@ -330,6 +338,8 @@ def cassists_pv(self,dc,dt,dt2,memlimit=-1):
 		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A.
 	For more information on tests, see paper.
 	ftype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis6 (similar format)
 	"""
 	from exceptions import ValueError
 	if self.lib is None:
@@ -474,6 +484,8 @@ def cassists(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 		Test 5 calculates E(A)->A--B with E(A)->B v.s. B<-E(A)->A. The earlier one is preferred.
 	For more information on tests, see paper.
 	ftype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis4 (similar format)
 	"""
 	return _cassists_any(self,dc,dt,dt2,"pijs_cassist",nodiag=nodiag,memlimit=memlimit)
 
@@ -557,6 +569,8 @@ def cassist(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 		Probability function from for recommended combination of multiple tests.
 	For more information on tests, see paper.
 	ftype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis5
 	"""
 	return _cassist_any(self,dc,dt,dt2,"pij_cassist",nodiag=nodiag,memlimit=memlimit)
 
@@ -581,6 +595,8 @@ def cassist_trad(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 		Probability function from for recommended combination of multiple tests.
 	For more information on tests, see paper.
 	ftype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis5 (same format)
 	"""
 	return _cassist_any(self,dc,dt,dt2,"pij_cassist_trad",nodiag=nodiag,memlimit=memlimit)
 
@@ -595,6 +611,8 @@ def rank_pv(self,dt,dt2,memlimit=-1):
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). P-values for A--B.
 	ftype and gtype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis1 (similar format)
 	"""
 	from exceptions import ValueError
 	if self.lib is None:
@@ -639,6 +657,8 @@ def rank(self,dt,dt2,nodiag=False,memlimit=-1):
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for A--B.
 	ftype and gtype can be found in auto.py.
+	
+	Example: see findr.examples.geuvadis1
 	"""
 	from exceptions import ValueError
 	if self.lib is None:

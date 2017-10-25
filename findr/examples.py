@@ -18,27 +18,42 @@
 """Examples of findr. For geuvadis dataset, see findr.examples.geuvadis1, findr.examples.geuvadis2, ... , findr.examples.geuvadis4"""
 
 def load_geuvadis_data():
-	"""Return: dict of 'dg','dc','dt','dt2' as part of geuvadis data."""
+	"""This function loads downsampled data files from the Geuvadis study (Lappalainen, T. et al. Transcriptome and genome sequencing uncovers functional variation in humans. Nature 501, 506-511 (2013)), including expression levels of 10 miRNAs and 3000 genes for 360 European individuals. Among them, all miRNAs and 1000 genes have significant cis-eQTLs, whose haplotypes are also included. File data formats follow Findr's binary interface input/output requirement. A description of each file is available below:
+	dmi.dat:	Expression levels of 10 miRNAs
+	dgmi.dat:	Haplotypes of cis-eQTLs of 10 miRNAs
+	dc.dat:		Continuous causal anchors for demonstration purposes, simulated from adding continuous noise to dgmi.dat
+	dt.dat:		Expression levels of 1000 genes that have cis-eQTLs
+	dt2.dat:	Expression levels of 3000 genes
+	dgt.dat:	Haplotypes of cis-eQTLs of 1000 genes
+	namest.txt:	3000 gene names"""
 	from os.path import dirname,join
 	from .auto import gtype_np,ftype_np
 	import numpy as np
-	d=join(dirname(__file__),'data','geuvadis')
-	fg=join(d,'dg.dat')
-	fc=join(d,'dc.dat')
-	ft=join(d,'dt.dat')
-	ft2=join(d,'dt2.dat')
-	dg=np.fromfile(fg,dtype=gtype_np).reshape(10,360)
-	dc=np.fromfile(fc,dtype=ftype_np).reshape(10,360)
-	dt=np.fromfile(ft,dtype=ftype_np).reshape(10,360)
-	dt2=np.fromfile(ft2,dtype=ftype_np).reshape(3000,360)
-	return {'dg':dg,'dc':dc,'dt':dt,'dt2':dt2}
+	def getdata(name,dtype,shape):
+		d=join(dirname(__file__),'data','geuvadis',name)
+		d=np.fromfile(d,dtype=dtype)
+		d=d.reshape(*shape)
+		return d
+	
+	ans={'dc':getdata('dc.dat',ftype_np,(10,360)),
+	'dgmi':getdata('dgmi.dat',gtype_np,(10,360)),
+	'dmi':getdata('dmi.dat',ftype_np,(10,360)),
+	'dgt':getdata('dgt.dat',gtype_np,(1000,360)),
+	'dt':getdata('dt.dat',ftype_np,(1000,360)),
+	'dt2':getdata('dt2.dat',ftype_np,(3000,360))}
+	
+	f=open(join(dirname(__file__),'data','geuvadis','namest.txt'),'r')
+	namest=map(lambda x:x.strip('\r\n'),f.readlines())
+	f.close()
+	ans['namest']=namest
+	return ans
 	
 def geuvadis1():
-	"""Example with geuvadis data without genotype information. Every line of execution is printed."""
+	"""Perform the correlation test, without genotype data, from 10 miRNAs to 1000 genes"""
 	lines=['import findr,findr.examples',
-		'l=findr.lib(loglv=12)',
+		'l=findr.lib() # or verbose: l=findr.lib(loglv=12)',
 		'd=findr.examples.load_geuvadis_data()',
-		'ans=l.pij_rank(d["dt"],d["dt2"])']
+		'ans=l.pij_rank(d["dmi"],d["dt"])']
 	for line in lines:
 		print '# '+line
 		exec line
@@ -46,43 +61,82 @@ def geuvadis1():
 	return ans
 	
 def geuvadis2():
-	"""Example with geuvadis data with genotype information. Every line of execution is printed."""
+	"""Perform the novel causal inference test from 10 miRNAs to 1000 genes, using cis-eQTLs as causal anchors"""
 	lines=['import findr,findr.examples',
-		'l=findr.lib(loglv=12)',
+		'l=findr.lib()',
 		'd=findr.examples.load_geuvadis_data()',
-		'ans1=l.pij_gassist(d["dg"],d["dt"],d["dt2"])',
-		'ans2=l.netr_one_greedy(ans1["p"][:,:ans1["p"].shape[0]])']
+		'ans=l.pij_gassist(d["dgmi"],d["dmi"],d["dt"])']
+	for line in lines:
+		print '# '+line
+		exec line
+	print '# return ans'
+	return ans
+
+def geuvadis3():
+	"""Perform the novel causal inference test from 1000 genes with cis-eQTLs to all 3000 genes"""
+	lines=['import findr,findr.examples',
+		'l=findr.lib()',
+		'd=findr.examples.load_geuvadis_data()',
+		'ans=l.pij_gassist(d["dgt"],d["dt"],d["dt2"],nodiag=True)']
+	for line in lines:
+		print '# '+line
+		exec line
+	print '# return ans'
+	return ans
+
+def geuvadis4():
+	"""Perform 5 subtests for causal inference test from 10 miRNAs to 1000 genes, using cis-eQTLs as causal anchors"""
+	lines=['import findr,findr.examples',
+		'l=findr.lib()',
+		'd=findr.examples.load_geuvadis_data()',
+		'ans=l.pijs_gassist(d["dgmi"],d["dmi"],d["dt"])']
+	for line in lines:
+		print '# '+line
+		exec line
+	print '# return ans'
+	return ans
+
+def geuvadis5():
+	"""Perform the novel causal inference test from 10 miRNAs to 1000 genes, using continuous causal anchors"""
+	lines=['import findr,findr.examples',
+		'l=findr.lib()',
+		'd=findr.examples.load_geuvadis_data()',
+		'ans=l.pij_cassist(d["dc"],d["dmi"],d["dt"])']
+	for line in lines:
+		print '# '+line
+		exec line
+	print '# return ans'
+	return ans
+
+def geuvadis6():
+	"""Perform 5 subtests for causal inference test from 10 miRNAs to 1000 genes, using cis-eQTLs as causal anchors and only obtaining p-values"""
+	lines=['import findr,findr.examples',
+		'l=findr.lib()',
+		'd=findr.examples.load_geuvadis_data()',
+		'ans=l.pijs_gassist_pv(d["dgmi"],d["dmi"],d["dt"])']
+	for line in lines:
+		print '# '+line
+		exec line
+	print '# return ans'
+	return ans
+
+def geuvadis7():
+	"""Constructs maximal direct acyclic graph from pairwise causal inference test probability among 1000 genes with cis-eQTLs"""
+	lines=['import findr,findr.examples',
+		'l=findr.lib()',
+		'd=findr.examples.load_geuvadis_data()',
+		'ans1=l.pij_gassist(d["dgt"],d["dt"],d["dt"],nodiag=True)',
+		'ans2=l.netr_one_greedy(ans1["p"])']
 	for line in lines:
 		print '# '+line
 		exec line
 	print '# return ans2'
 	return ans2
 
-def geuvadis3():
-	"""Example with geuvadis data with genotype information, but only computes p-values. Every line of execution is printed."""
-	lines=['import findr,findr.examples',
-		'l=findr.lib(loglv=12)',
-		'd=findr.examples.load_geuvadis_data()',
-		'ans=l.pijs_gassist_pv(d["dg"],d["dt"],d["dt2"])']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans'
-	return ans
-	
-def geuvadis4():
-	"""Example with geuvadis data with continuous anchor. Every line of execution is printed."""
-	lines=['import findr,findr.examples',
-		'l=findr.lib(loglv=12)',
-		'd=findr.examples.load_geuvadis_data()',
-		'ans1=l.pij_cassist(d["dc"],d["dt"],d["dt2"])',
-		'ans2=l.netr_one_greedy(ans1["p"][:,:ans1["p"].shape[0]])']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans2'
-	return ans2
-	
+
+
+
+
 
 
 
