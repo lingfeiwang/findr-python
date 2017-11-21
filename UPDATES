@@ -1,5 +1,7 @@
 For detailed updates in findr library functionality, see UPDATES in findr library.
 
+1.0.4:
+	Adapted for python2/3.
 1.0.3:
 	Updated examples.
 	Bug corrections in raising errors.

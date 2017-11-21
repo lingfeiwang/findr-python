@@ -21,7 +21,15 @@ import ctypes as c
 import numpy as np
 from .common import *
 from .osdepend import typesizet,npulong
-from exceptions import ValueError
+
+try: from exceptions import ValueError,NotImplementedError,NameError
+except ImportError: pass
+
+try:
+	long
+	isint=lambda v: type(v) is int or type(v) is long
+except NameError:
+	isint=lambda v: type(v) is int
 
 class blockuc(c.Structure):
 	_fields_=[("size",typesizet),("data",c_ubyte_p)]
@@ -57,15 +65,14 @@ def vectoruc_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockuc(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(c_ubyte_p))
+	sb=blockuc(typesizet(d.ctypes.strides[0]*d.shape[0]//nb),d.ctypes.data_as(c_ubyte_p))
 	sv=vectoruc(d.ctypes.shape[0],
-		d.ctypes.strides[0]/d.dtype.type().nbytes,
+		d.ctypes.strides[0]//d.dtype.type().nbytes,
 		d.ctypes.data_as(c_ubyte_p),
 		c.pointer(sb),
 		0)
 	return sv
 def vectoruc_pout(d):
-	from exceptions import NotImplementedError
 	raise NotImplementedError
 
 def matrixuc_pin(d0,req=['A','C','W']):
@@ -76,16 +83,15 @@ def matrixuc_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockuc(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(c_ubyte_p))
+	sb=blockuc(typesizet(d.ctypes.strides[0]*d.shape[0]//nb),d.ctypes.data_as(c_ubyte_p))
 	sv=matrixuc(d.ctypes.shape[0],
 		d.ctypes.shape[1],
-		d.ctypes.strides[0]/nb,
+		d.ctypes.strides[0]//nb,
 		d.ctypes.data_as(c_ubyte_p),
 		c.pointer(sb),
 		0)
 	return sv
 def matrixuc_pout(d):
-	from exceptions import NotImplementedError
 	raise NotImplementedError
 	
 
@@ -96,15 +102,14 @@ def vectorf_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockf(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(ftype_p))
+	sb=blockf(typesizet(d.ctypes.strides[0]*d.shape[0]//nb),d.ctypes.data_as(ftype_p))
 	sv=vectorf(d.ctypes.shape[0],
-		d.ctypes.strides[0]/d.dtype.type().nbytes,
+		d.ctypes.strides[0]//d.dtype.type().nbytes,
 		d.ctypes.data_as(ftype_p),
 		c.pointer(sb),
 		0)
 	return sv
 def vectorf_pout(d):
-	from exceptions import NotImplementedError
 	raise NotImplementedError
 
 def matrixf_pin(d0,req=['A','C','W']):
@@ -115,16 +120,15 @@ def matrixf_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockf(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(ftype_p))
+	sb=blockf(typesizet(d.ctypes.strides[0]*d.shape[0]//nb),d.ctypes.data_as(ftype_p))
 	sv=matrixf(d.ctypes.shape[0],
 		d.ctypes.shape[1],
-		d.ctypes.strides[0]/nb,
+		d.ctypes.strides[0]//nb,
 		d.ctypes.data_as(ftype_p),
 		c.pointer(sb),
 		0)
 	return sv
 def matrixf_pout(d):
-	from exceptions import NotImplementedError
 	raise NotImplementedError
 	
 def vectorg_pin(d0,req=['A','C','W']):
@@ -134,15 +138,14 @@ def vectorg_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockg(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(gtype_p))
+	sb=blockg(typesizet(d.ctypes.strides[0]*d.shape[0]//nb),d.ctypes.data_as(gtype_p))
 	sv=vectorg(d.ctypes.shape,
-		d.ctypes.strides[0]/d.dtype.type().nbytes,
+		d.ctypes.strides[0]//d.dtype.type().nbytes,
 		d.ctypes.data_as(gtype_p),
 		c.pointer(sb),
 		0)
 	return sv
 def vectorg_pout(d):
-	from exceptions import NotImplementedError
 	raise NotImplementedError
 
 def matrixg_pin(d0,req=['A','C','W']):
@@ -153,17 +156,16 @@ def matrixg_pin(d0,req=['A','C','W']):
 		raise ValueError('Wrong input dtype')
 	d=np.require(d0,requirements=req)
 	nb=d.dtype.type().nbytes
-	sb=blockg(typesizet(d.ctypes.strides[0]*d.shape[0]/nb),d.ctypes.data_as(gtype_p))
+	sb=blockg(typesizet(d.ctypes.strides[0]*d.shape[0]//nb),d.ctypes.data_as(gtype_p))
 	sv=matrixg()
 	sv=matrixg(d.ctypes.shape[0],
 		d.ctypes.shape[1],
-		d.ctypes.strides[0]/nb,
+		d.ctypes.strides[0]//nb,
 		d.ctypes.data_as(gtype_p),
 		c.pointer(sb),
 		0)
 	return sv
 def matrixg_pout(d):
-	from exceptions import NotImplementedError
 	raise NotImplementedError
 	
 
@@ -220,9 +222,9 @@ class cfunc:
 	def __init__(self,lib,funcname,rettype='void',argtypes=[]):
 		self.rt=rettype
 		self.at=argtypes
-		self.f=c.CFUNCTYPE(vmap[rettype][1],*map(lambda x:vmap[x][1],argtypes))((funcname,lib))
+		self.f=c.CFUNCTYPE(vmap[rettype][1],*[vmap[x][1] for x in argtypes])((funcname,lib))
 	def __call__(self,*arg):
-		a=map(lambda x:vmap[self.at[x]][2].pin(arg[x]),xrange(len(arg)))
+		a=[vmap[self.at[x]][2].pin(arg[x]) for x in range(len(arg))]
 		return vmap[self.rt][2].pout(self.f(*a))
 
 

@@ -44,28 +44,30 @@ def one_greedy(self,dp,namax=None,nimax=None,nomax=None):
 	
 	Example: see findr.examples.geuvadis7
 	"""
-	from exceptions import ValueError
+	try: from exceptions import ValueError
+	except ImportError: pass
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np
+	from .types import isint
 	if dp.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for prior matrix')
 	if len(dp.shape)!=2:
 		raise ValueError('Wrong input shape')
-	if not (namax is None or type(namax) is int or type(namax) is long):
+	if not (namax is None or isint(namax)):
 		raise ValueError('Wrong namax type')
 	if namax is not None and namax<=0:
 		raise ValueError('Input requires namax>0.')
 	if namax is None:
 		namax=-1
-	if not (nimax is None or type(nimax) is int or type(nimax) is long):
+	if not (nimax is None or isint(nimax)):
 		raise ValueError('Wrong nimax type')
 	if nimax is not None and nimax<=0:
 		raise ValueError('Input requires nimax>0.')
 	if nimax is None:
 		nimax=-1
-	if not (nomax is None or type(nomax) is int or type(nomax) is long):
+	if not (nomax is None or isint(nomax)):
 		raise ValueError('Wrong nomax type')
 	if nomax is not None and nomax<=0:
 		raise ValueError('Input requires nomax>0.')

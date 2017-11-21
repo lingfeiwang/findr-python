@@ -43,22 +43,26 @@ def load_geuvadis_data():
 	'dt2':getdata('dt2.dat',ftype_np,(3000,360))}
 	
 	f=open(join(dirname(__file__),'data','geuvadis','namest.txt'),'r')
-	namest=map(lambda x:x.strip('\r\n'),f.readlines())
+	namest=[x.strip('\r\n') for x in f.readlines()]
 	f.close()
 	ans['namest']=namest
 	return ans
-	
+
+def runcode(code):
+	"""Run the given code line by line with printing, as list of lines, and return variable 'ans'."""
+	for line in code:
+		print('# '+line)
+		exec(line)
+	print('# return ans')
+	return ans
+		
 def geuvadis1():
 	"""Perform the correlation test, without genotype data, from 10 miRNAs to 1000 genes"""
 	lines=['import findr,findr.examples',
 		'l=findr.lib() # or verbose: l=findr.lib(loglv=12)',
 		'd=findr.examples.load_geuvadis_data()',
 		'ans=l.pij_rank(d["dmi"],d["dt"])']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans'
-	return ans
+	return runcode(lines)
 	
 def geuvadis2():
 	"""Perform the novel causal inference test from 10 miRNAs to 1000 genes, using cis-eQTLs as causal anchors"""
@@ -66,11 +70,7 @@ def geuvadis2():
 		'l=findr.lib()',
 		'd=findr.examples.load_geuvadis_data()',
 		'ans=l.pij_gassist(d["dgmi"],d["dmi"],d["dt"])']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans'
-	return ans
+	return runcode(lines)
 
 def geuvadis3():
 	"""Perform the novel causal inference test from 1000 genes with cis-eQTLs to all 3000 genes"""
@@ -78,11 +78,7 @@ def geuvadis3():
 		'l=findr.lib()',
 		'd=findr.examples.load_geuvadis_data()',
 		'ans=l.pij_gassist(d["dgt"],d["dt"],d["dt2"],nodiag=True)']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans'
-	return ans
+	return runcode(lines)
 
 def geuvadis4():
 	"""Perform 5 subtests for causal inference test from 10 miRNAs to 1000 genes, using cis-eQTLs as causal anchors"""
@@ -90,11 +86,7 @@ def geuvadis4():
 		'l=findr.lib()',
 		'd=findr.examples.load_geuvadis_data()',
 		'ans=l.pijs_gassist(d["dgmi"],d["dmi"],d["dt"])']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans'
-	return ans
+	return runcode(lines)
 
 def geuvadis5():
 	"""Perform the novel causal inference test from 10 miRNAs to 1000 genes, using continuous causal anchors"""
@@ -102,11 +94,7 @@ def geuvadis5():
 		'l=findr.lib()',
 		'd=findr.examples.load_geuvadis_data()',
 		'ans=l.pij_cassist(d["dc"],d["dmi"],d["dt"])']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans'
-	return ans
+	return runcode(lines)
 
 def geuvadis6():
 	"""Perform 5 subtests for causal inference test from 10 miRNAs to 1000 genes, using cis-eQTLs as causal anchors and only obtaining p-values"""
@@ -114,11 +102,7 @@ def geuvadis6():
 		'l=findr.lib()',
 		'd=findr.examples.load_geuvadis_data()',
 		'ans=l.pijs_gassist_pv(d["dgmi"],d["dmi"],d["dt"])']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans'
-	return ans
+	return runcode(lines)
 
 def geuvadis7():
 	"""Constructs maximal direct acyclic graph from pairwise causal inference test probability among 1000 genes with cis-eQTLs"""
@@ -126,12 +110,8 @@ def geuvadis7():
 		'l=findr.lib()',
 		'd=findr.examples.load_geuvadis_data()',
 		'ans1=l.pij_gassist(d["dgt"],d["dt"],d["dt"],nodiag=True)',
-		'ans2=l.netr_one_greedy(ans1["p"])']
-	for line in lines:
-		print '# '+line
-		exec line
-	print '# return ans2'
-	return ans2
+		'ans=l.netr_one_greedy(ans1["p"])']
+	return runcode(lines)
 
 
 

@@ -17,6 +17,9 @@
 # 
 """Python interface"""
 
+try: from exceptions import ValueError
+except ImportError: pass
+
 def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1):
 	"""Calculates p-values of gene i regulating gene j with genotype data assisted method with multiple tests.
 	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
@@ -48,20 +51,20 @@ def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis6
 	"""
-	from exceptions import ValueError
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np,gtype_np
+	from .types import isint
 	if dg.dtype.char!=gtype_np:
 		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dg.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
-	if not (type(memlimit) is int or type(memlimit) is long):
+	if not isint(memlimit):
 		raise ValueError('Wrong memlimit type')
-	if not (na is None or type(na) is int or type(na) is long):
+	if not (na is None or isint(na)):
 		raise ValueError('Wrong na type')
 	if na is not None and na<=0:
 		raise ValueError('Input requires na>0.')
@@ -134,11 +137,11 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis4
 	"""
-	from exceptions import ValueError
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np,gtype_np
+	from .types import isint
 	if dg.dtype.char!=gtype_np:
 		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
@@ -147,9 +150,9 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 		raise ValueError('Wrong input shape')
 	if type(nodiag) is not bool:
 		raise ValueError('Wrong nodiag type')
-	if not (type(memlimit) is int or type(memlimit) is long):
+	if not isint(memlimit):
 		raise ValueError('Wrong memlimit type')
-	if not (na is None or type(na) is int or type(na) is long):
+	if not (na is None or isint(na)):
 		raise ValueError('Wrong na type')
 	if na is not None and na<=0:
 		raise ValueError('Input requires na>0.')
@@ -209,11 +212,11 @@ def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	For more information on tests, see paper.
 	ftype and gtype can be found in auto.py.
 	"""
-	from exceptions import ValueError
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np,gtype_np
+	from .types import isint
 	if dg.dtype.char!=gtype_np:
 		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
@@ -222,9 +225,9 @@ def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 		raise ValueError('Wrong input shape')
 	if type(nodiag) is not bool:
 		raise ValueError('Wrong nodiag type')
-	if not (type(memlimit) is int or type(memlimit) is long):
+	if not isint(memlimit):
 		raise ValueError('Wrong memlimit type')
-	if not (na is None or type(na) is int or type(na) is long):
+	if not (na is None or isint(na)):
 		raise ValueError('Wrong na type')
 	if na is not None and na<=0:
 		raise ValueError('Input requires na>0.')
@@ -341,16 +344,16 @@ def cassists_pv(self,dc,dt,dt2,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis6 (similar format)
 	"""
-	from exceptions import ValueError
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np
+	from .types import isint
 	if dc.dtype.char!=ftype_np or dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dc.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
-	if not (type(memlimit) is int or type(memlimit) is long):
+	if not isint(memlimit):
 		raise ValueError('Wrong memlimit type')
 	ng=dc.shape[0]
 	nt=dt2.shape[0]
@@ -411,18 +414,18 @@ def _cassists_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
 	For more information on tests, see paper.
 	ftype can be found in auto.py.
 	"""
-	from exceptions import ValueError
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np
+	from .types import isint
 	if dc.dtype.char!=ftype_np or dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dc.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
 	if type(nodiag) is not bool:
 		raise ValueError('Wrong nodiag type')
-	if not (type(memlimit) is int or type(memlimit) is long):
+	if not isint(memlimit):
 		raise ValueError('Wrong memlimit type')
 	ng=dc.shape[0]
 	nt=dt2.shape[0]
@@ -513,18 +516,18 @@ def _cassist_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
 	For more information on tests, see paper.
 	ftype can be found in auto.py.
 	"""
-	from exceptions import ValueError
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np
+	from .types import isint
 	if dc.dtype.char!=ftype_np or dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dc.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
 	if type(nodiag) is not bool:
 		raise ValueError('Wrong nodiag type')
-	if not (type(memlimit) is int or type(memlimit) is long):
+	if not isint(memlimit):
 		raise ValueError('Wrong memlimit type')
 	ng=dc.shape[0]
 	nt=dt2.shape[0]
@@ -614,16 +617,16 @@ def rank_pv(self,dt,dt2,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis1 (similar format)
 	"""
-	from exceptions import ValueError
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np,gtype_np
+	from .types import isint
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
-	if not (type(memlimit) is int or type(memlimit) is long):
+	if not isint(memlimit):
 		raise ValueError('Wrong memlimit type')
 	ng=dt.shape[0]
 	nt=dt2.shape[0]
@@ -660,18 +663,18 @@ def rank(self,dt,dt2,nodiag=False,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis1
 	"""
-	from exceptions import ValueError
 	if self.lib is None:
 		raise ValueError("Not initialized.")
 	import numpy as np
 	from .auto import ftype_np,gtype_np
+	from .types import isint
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dt.shape)!=2 or len(dt2.shape)!=2:
 		raise ValueError('Wrong input shape')
 	if type(nodiag) is not bool:
 		raise ValueError('Wrong nodiag type')
-	if not (type(memlimit) is int or type(memlimit) is long):
+	if not isint(memlimit):
 		raise ValueError('Wrong memlimit type')
 	ng=dt.shape[0]
 	nt=dt2.shape[0]
@@ -692,6 +695,7 @@ def rank(self,dt,dt2,nodiag=False,memlimit=-1):
 	ret=func(*args)
 	ans={'ret':ret,'p':dp}
 	return ans
+
 
 
 

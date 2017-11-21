@@ -23,6 +23,8 @@ For examples, see: findr.examples.
 import ctypes
 __all__=["auto","common","pij","netr","osdepend","types"]
 from . import pij, netr
+try: from exceptions import ValueError,OSError
+except ImportError: pass
 
 class lib:
 	@staticmethod	
@@ -34,7 +36,7 @@ class lib:
 			lp=[pjoin(environ['WINDIR'],'System32')]+lpaths
 		else:
 			lp=lpaths
-		return map(lambda x:pjoin(x,libfname),lp)
+		return [pjoin(x,libfname) for x in lp]
 	def __init__(self,path=None,loglv=6,rs=0,nth=0):
 		"""Links and initializes shared library.
 		path:	Extra exact file location for shared library
@@ -43,7 +45,6 @@ class lib:
 		nth:	Maximum number of parallel threads. Default (0) indicates to use automatically determined number of cores (not always correct).
 		"""
 		self.lib=None
-		from exceptions import ValueError, OSError
 		import logging
 		from .auto import pkgname,version
 		from .osdepend import fdll,typesizet
@@ -59,18 +60,18 @@ class lib:
 		for p in paths:
 			try:
 				lib=fdll(p)
-				ln=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_name',lib))()
-				lv=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_version',lib))()
+				ln=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_name',lib))().decode()
+				lv=ctypes.CFUNCTYPE(ctypes.c_char_p)(('lib_version',lib))().decode()
 				lv1=ctypes.CFUNCTYPE(typesizet)(('lib_version1',lib))()
 				lv2=ctypes.CFUNCTYPE(typesizet)(('lib_version2',lib))()
 				lv3=ctypes.CFUNCTYPE(typesizet)(('lib_version3',lib))()
 				pv='.'.join(map(str,version))
 				if((ln!=pkgname) or (lv1!=version[0]) or (lv2!=version[1])):
-					logging.warning('Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+'. Skipped.')
+					logging.warning('Located library {} {} different from python interface for {} {} at {}. Skipped.'.format(ln,lv,pkgname,pv,p))
 					lib=None
 					continue
 				elif lv3!=version[2]:
-					logging.warning('Located library '+ln+' '+lv+' different from python interface for '+pkgname+' '+pv+' at '+p+', but only at patch version. Loaded.')
+					logging.info('Located library {} {} different from python interface for {} {} at {}, but only at patch version. Loaded.'.format(ln,lv,pkgname,pv,p))
 				lib.lib_init(ctypes.c_ubyte(loglv),ctypes.c_ulong(rs),typesizet(nth))
 			except:
 				lib=None
@@ -80,7 +81,6 @@ class lib:
 			raise OSError("Library not found at default path. Please install/update "+pkgname+' library and python interface, or set library path manually.')
 		self.lib=lib
 	def cfunc(self,*a,**ka):
-		from exceptions import ValueError
 		if self.lib is None:
 			raise ValueError("Not initialized.")
 		from .types import cfunc
