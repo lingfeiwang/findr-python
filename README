@@ -1,13 +1,14 @@
 Findr (Fast Inference of Networks from Directed Regulations) is a statistical inference tool for genetics. It predicts the probability of pairwise gene regulation probability based on gene expression level data. When genotype data is available for the best eQTLs, higher prediction accuracy can be achieved. The pairwise regulation probability is then applied for the reconstruction of gene regulation networks.
 
-Findr obtains much higher accuracy and faster speed than existing programs [1]. This is due to the analytical and implementational advances. Findr library can be downloaded from [2].
+Findr obtains much higher accuracy and faster speed than existing programs [1]. This is due to the analytical and implementational advances. Findr's unprecedented speed allows for whole-transcriptome causal network reconstruction, with a tutorial in [2]. Findr library can be downloaded from [3].
 
-This package is the python interface of Findr library, downloadable from [3]. It requires Findr library to be pre-installed. The binary interface and R package are also provided for Findr, downloadable from [4] and [5] respectively.
+This package is the python interface of Findr library, downloadable from [4]. It requires Findr library to be pre-installed. The binary interface and R package are also provided for Findr, downloadable from [5] and [6] respectively.
 
-A more detailed documentation of Findr can be found as doc.pdf. For the list of updates of the python interface, see UPDATES. For functionality updates, see UPDATES in [2]. Examples can be found in findr.examples.
+A more detailed documentation of Findr can be found as doc.pdf. For the list of updates of the python interface, see UPDATES. For functionality updates, see UPDATES in [3]. Examples can be found in findr.examples.
 
 [1] Lingfei Wang and Tom Michoel (2017) Efficient and accurate causal inference with hidden confounders from genome-transcriptome variation data. PLOS Computational Biology 13(8): e1005703. https://doi.org/10.1371/journal.pcbi.1005703
-[2] https://github.com/lingfeiwang/findr
-[3] https://github.com/lingfeiwang/findr-python
-[4] https://github.com/lingfeiwang/findr-bin
-[5] https://github.com/lingfeiwang/findr-R
+[2] Lingfei Wang and Tom Michoel (2017) Whole-transcriptome causal network inference with genomic and transcriptomic data. bioRxiv 213371. https://doi.org/10.1101/213371
+[3] https://github.com/lingfeiwang/findr
+[4] https://github.com/lingfeiwang/findr-python
+[5] https://github.com/lingfeiwang/findr-bin
+[6] https://github.com/lingfeiwang/findr-R
