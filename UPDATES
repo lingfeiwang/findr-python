@@ -1,5 +1,7 @@
 For detailed updates in findr library functionality, see UPDATES in findr library.
 
+1.0.8:
+	Added automatic data type conversion to relax input constraints.
 1.0.7:
 	Corrected examples.
 1.0.6:

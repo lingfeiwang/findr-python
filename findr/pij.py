@@ -1,4 +1,4 @@
-# Copyright 2016-2018 Lingfei Wang
+# Copyright 2016-2018, 2020 Lingfei Wang
 # 
 # This file is part of Findr.
 # 
@@ -20,7 +20,7 @@
 try: from exceptions import ValueError
 except ImportError: pass
 
-def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1):
+def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1,autotype=True):
 	"""Calculates p-values of gene i regulating gene j with genotype data assisted method with multiple tests.
 	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
 		Entry dg[i,j] is genotype i's value for sample j.
@@ -34,6 +34,7 @@ def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1):
 	na:	Number of alleles the species have. It determintes the maximum number of values each genotype can take. When unspecified, it is automatically
 		determined as the maximum of dg.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p1:	numpy.ndarray(nt,dtype=ftype(='f4' by default)). P-values for LLR of test 1.
@@ -56,6 +57,14 @@ def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	from .types import isint
+	if autotype:
+		dg=dg.astype(gtype_np)
+		dt=dt.astype(ftype_np)
+		dt2=dt2.astype(ftype_np)
+		if memlimit is not None:
+			memlimit=int(memlimit)
+		if na is not None:
+			na=int(na)
 	if dg.dtype.char!=gtype_np:
 		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
@@ -95,7 +104,7 @@ def gassists_pv(self,dg,dt,dt2,na=None,memlimit=-1):
 	ans={'ret':ret,'p1':d1,'p2':d2,'p3':d3,'p4':d4,'p5':d5}
 	return ans
 
-def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
+def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1,autotype=True):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
 	with multiple tests, by converting log likelihoods into probabilities per A for all B.
 	Probabilities are converted from likelihood ratios separately for each A. This gives better
@@ -117,6 +126,7 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p1:	numpy.ndarray(nt,dtype=ftype(='=f4' by default)). Probability for test 1.
@@ -142,6 +152,15 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	from .types import isint
+	if autotype:
+		dg=dg.astype(gtype_np)
+		dt=dt.astype(ftype_np)
+		dt2=dt2.astype(ftype_np)
+		nodiag=bool(nodiag)
+		if memlimit is not None:
+			memlimit=int(memlimit)
+		if na is not None:
+			na=int(na)
 	if dg.dtype.char!=gtype_np:
 		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
@@ -184,7 +203,7 @@ def gassists(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	ans={'ret':ret,'p1':d1,'p2':d2,'p3':d3,'p4':d4,'p5':d5}
 	return ans
 
-def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
+def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1,autotype=True):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
 	with the recommended combination of multiple tests.
 	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
@@ -205,6 +224,7 @@ def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
@@ -217,6 +237,15 @@ def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	from .types import isint
+	if autotype:
+		dg=dg.astype(gtype_np)
+		dt=dt.astype(ftype_np)
+		dt2=dt2.astype(ftype_np)
+		nodiag=bool(nodiag)
+		if memlimit is not None:
+			memlimit=int(memlimit)
+		if na is not None:
+			na=int(na)
 	if dg.dtype.char!=gtype_np:
 		raise ValueError('Wrong input dtype for genotype data: dg.dtype.char is '+dg.dtype.char+'!='+gtype_np)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
@@ -253,7 +282,7 @@ def _gassist_any(self,dg,dt,dt2,name,na=None,nodiag=False,memlimit=-1):
 	ans={'ret':ret,'p':d}
 	return ans
 
-def gassist(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
+def gassist(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1,**ka):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method,
 	with the recommended combination of multiple tests.
 	Probabilities are converted from likelihood ratios separately for each A. This gives better
@@ -275,6 +304,7 @@ def gassist(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
@@ -284,9 +314,9 @@ def gassist(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis2, findr.examples.geuvadis3
 	"""
-	return _gassist_any(self,dg,dt,dt2,"pij_gassist",na=na,nodiag=nodiag,memlimit=memlimit)
+	return _gassist_any(self,dg,dt,dt2,"pij_gassist",na=na,nodiag=nodiag,memlimit=memlimit,**ka)
 
-def gassist_trad(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
+def gassist_trad(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1,**ka):
 	"""Calculates probability of gene i regulating gene j with genotype data assisted method with traditional test.
 	WARNING: This is not and is not intended as a loyal reimplementation of Trigger. This test does not include p1.
 	dg:	numpy.ndarray(nt,ns,dtype=gtype(='u1' by default)) Genotype data.
@@ -306,6 +336,7 @@ def gassist_trad(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
@@ -315,9 +346,9 @@ def gassist_trad(self,dg,dt,dt2,na=None,nodiag=False,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis2, findr.examples.geuvadis3 (same format)
 	"""
-	return _gassist_any(self,dg,dt,dt2,"pij_gassist_trad",na=na,nodiag=nodiag,memlimit=memlimit)
+	return _gassist_any(self,dg,dt,dt2,"pij_gassist_trad",na=na,nodiag=nodiag,memlimit=memlimit,**ka)
 
-def cassists_pv(self,dc,dt,dt2,memlimit=-1):
+def cassists_pv(self,dc,dt,dt2,memlimit=-1,autotype=True):
 	"""Calculates p-values of gene i regulating gene j with continuous anchor data assisted method with multiple tests.
 	dc:	numpy.ndarray(nt,ns,dtype=ftype(='f4' by default)) Continuous anchor data.
 		Entry dc[i,j] is anchor i's value for sample j.
@@ -327,6 +358,7 @@ def cassists_pv(self,dc,dt,dt2,memlimit=-1):
 	dt2:numpy.ndarray(nt2,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
 		dt2 has the same format as dt, and can be identical with, different from, or a superset of dt.
 	memlimit:	The approximate memory usage limit in bytes for the library. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p1:	numpy.ndarray(nt,dtype=ftype(='f4' by default)). P-values for LLR of test 1.
@@ -349,6 +381,12 @@ def cassists_pv(self,dc,dt,dt2,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np
 	from .types import isint
+	if autotype:
+		dc=dc.astype(ftype_np)
+		dt=dt.astype(ftype_np)
+		dt2=dt2.astype(ftype_np)
+		if memlimit is not None:
+			memlimit=int(memlimit)
 	if dc.dtype.char!=ftype_np or dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dc.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
@@ -380,7 +418,7 @@ def cassists_pv(self,dc,dt,dt2,memlimit=-1):
 	ans={'ret':ret,'p1':d1,'p2':d2,'p3':d3,'p4':d4,'p5':d5}
 	return ans
 	
-def _cassists_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
+def _cassists_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1,autotype=True):
 	"""Calculates probability of gene i regulating gene j with continuous anchor data assisted method,
 	with multiple tests, by converting log likelihoods into probabilities per A for all B.
 	dc:	numpy.ndarray(nt,ns,dtype=ftype(='f4' by default)) Continuous anchor data.
@@ -397,6 +435,7 @@ def _cassists_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p1:	numpy.ndarray(nt,dtype=ftype(='=f4' by default)). Probability for test 1.
@@ -419,6 +458,13 @@ def _cassists_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np
 	from .types import isint
+	if autotype:
+		dc=dc.astype(ftype_np)
+		dt=dt.astype(ftype_np)
+		dt2=dt2.astype(ftype_np)
+		nodiag=bool(nodiag)
+		if memlimit is not None:
+			memlimit=int(memlimit)
 	if dc.dtype.char!=ftype_np or dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dc.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
@@ -453,7 +499,7 @@ def _cassists_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
 	ans={'ret':ret,'p1':d1,'p2':d2,'p3':d3,'p4':d4,'p5':d5}
 	return ans
 
-def cassists(self,dc,dt,dt2,nodiag=False,memlimit=-1):
+def cassists(self,dc,dt,dt2,nodiag=False,memlimit=-1,**ka):
 	"""Calculates probability of gene i regulating gene j with continuous data assisted method,
 	with multiple tests, by converting log likelihoods into probabilities per A for all B.
 	Probabilities are converted from likelihood ratios separately for each A. This gives better
@@ -471,6 +517,7 @@ def cassists(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p1:	numpy.ndarray(nt,dtype=ftype(='=f4' by default)). Probability for test 1.
@@ -490,9 +537,9 @@ def cassists(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis4 (similar format)
 	"""
-	return _cassists_any(self,dc,dt,dt2,"pijs_cassist",nodiag=nodiag,memlimit=memlimit)
+	return _cassists_any(self,dc,dt,dt2,"pijs_cassist",nodiag=nodiag,memlimit=memlimit,**ka)
 
-def _cassist_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
+def _cassist_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1,autotype=True):
 	"""Calculates probability of gene i regulating gene j with continuous data assisted method,
 	with the recommended combination of multiple tests.
 	dc:	numpy.ndarray(nt,ns,dtype=ftype(='f4' by default)) Continuous anchor data.
@@ -509,6 +556,7 @@ def _cassist_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
@@ -521,6 +569,13 @@ def _cassist_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np
 	from .types import isint
+	if autotype:
+		dc=dc.astype(ftype_np)
+		dt=dt.astype(ftype_np)
+		dt2=dt2.astype(ftype_np)
+		nodiag=bool(nodiag)
+		if memlimit is not None:
+			memlimit=int(memlimit)
 	if dc.dtype.char!=ftype_np or dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dc.shape)!=2 or len(dt.shape)!=2 or len(dt2.shape)!=2:
@@ -548,7 +603,7 @@ def _cassist_any(self,dc,dt,dt2,name,nodiag=False,memlimit=-1):
 	ans={'ret':ret,'p':d}
 	return ans
 
-def cassist(self,dc,dt,dt2,nodiag=False,memlimit=-1):
+def cassist(self,dc,dt,dt2,nodiag=False,memlimit=-1,**ka):
 	"""Calculates probability of gene i regulating gene j with continuous data assisted method,
 	with the recommended combination of multiple tests.
 	Probabilities are converted from likelihood ratios separately for each A. This gives better
@@ -566,6 +621,7 @@ def cassist(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
@@ -575,9 +631,9 @@ def cassist(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis5
 	"""
-	return _cassist_any(self,dc,dt,dt2,"pij_cassist",nodiag=nodiag,memlimit=memlimit)
+	return _cassist_any(self,dc,dt,dt2,"pij_cassist",nodiag=nodiag,memlimit=memlimit,**ka)
 
-def cassist_trad(self,dc,dt,dt2,nodiag=False,memlimit=-1):
+def cassist_trad(self,dc,dt,dt2,nodiag=False,memlimit=-1,**ka):
 	"""Calculates probability of gene i regulating gene j with continuous data assisted method with traditional test.
 	dc:	numpy.ndarray(nt,ns,dtype=ftype(='f4' by default)) Continuous anchor data.
 		Entry dc[i,j] is anchor i's value for sample j.
@@ -592,6 +648,7 @@ def cassist_trad(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A->B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will be split into smaller chunks. If the memory limit is smaller than minimum required, calculation can fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)).
@@ -601,15 +658,16 @@ def cassist_trad(self,dc,dt,dt2,nodiag=False,memlimit=-1):
 	
 	Example: see findr.examples.geuvadis5 (same format)
 	"""
-	return _cassist_any(self,dc,dt,dt2,"pij_cassist_trad",nodiag=nodiag,memlimit=memlimit)
+	return _cassist_any(self,dc,dt,dt2,"pij_cassist_trad",nodiag=nodiag,memlimit=memlimit,**ka)
 
-def rank_pv(self,dt,dt2,memlimit=-1):
+def rank_pv(self,dt,dt2,memlimit=-1,autotype=True):
 	"""Calculates p-values of gene i correlating with gene j by converting log likelihoods into probabilities per A for all B.
 	dt:	numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
 		Entry dt[i,j] is gene i's expression level for sample j.
 	dt2:numpy.ndarray(nt2,ns,dtype=ftype(='=f4' by default)) Gene expression data for B.
 		dt2 has the same format as dt, and can be identical with, different from, a subset of, or a superset of dt.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). P-values for A--B.
@@ -622,6 +680,11 @@ def rank_pv(self,dt,dt2,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	from .types import isint
+	if autotype:
+		dt=dt.astype(ftype_np)
+		dt2=dt2.astype(ftype_np)
+		if memlimit is not None:
+			memlimit=int(memlimit)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dt.shape)!=2 or len(dt2.shape)!=2:
@@ -647,7 +710,7 @@ def rank_pv(self,dt,dt2,memlimit=-1):
 	ans={'ret':ret,'p':dp}
 	return ans
 
-def rank(self,dt,dt2,nodiag=False,memlimit=-1):
+def rank(self,dt,dt2,nodiag=False,memlimit=-1,autotype=True):
 	"""Calculates probability of gene i correlating with gene j by converting log likelihoods into probabilities per A for all B.
 	dt:	numpy.ndarray(nt,ns,dtype=ftype(='=f4' by default)) Gene expression data for A
 		Entry dt[i,j] is gene i's expression level for sample j.
@@ -656,6 +719,7 @@ def rank(self,dt,dt2,nodiag=False,memlimit=-1):
 	nodiag:	skip diagonal regulations, i.e. regulation A--B for A=B.
 		This should be set to True when A is a subset of B and aligned correspondingly.
 	memlimit:	The approximate memory usage limit in bytes for the library.  For datasets require a larger memory, calculation will fail with an error message. memlimit=0 defaults to unlimited memory usage.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	p:	numpy.ndarray((nt,nt2),dtype=ftype(='=f4' by default)). Probability for A--B.
@@ -668,6 +732,12 @@ def rank(self,dt,dt2,nodiag=False,memlimit=-1):
 	import numpy as np
 	from .auto import ftype_np,gtype_np
 	from .types import isint
+	if autotype:
+		dt=dt.astype(ftype_np)
+		dt2=dt2.astype(ftype_np)
+		nodiag=bool(nodiag)
+		if memlimit is not None:
+			memlimit=int(memlimit)
 	if dt.dtype.char!=ftype_np or dt2.dtype.char!=ftype_np:
 		raise ValueError('Wrong input dtype for gene expression data')
 	if len(dt.shape)!=2 or len(dt2.shape)!=2:
@@ -695,37 +765,3 @@ def rank(self,dt,dt2,nodiag=False,memlimit=-1):
 	ret=func(*args)
 	ans={'ret':ret,'p':dp}
 	return ans
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

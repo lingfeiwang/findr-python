@@ -1,4 +1,4 @@
-# Copyright 2016-2018 Lingfei Wang
+# Copyright 2016-2018, 2020 Lingfei Wang
 # 
 # This file is part of Findr.
 # 
@@ -17,7 +17,7 @@
 # 
 """Python interface"""
 
-def one_greedy(self,dp,namax=None,nimax=None,nomax=None):
+def one_greedy(self,dp,namax=None,nimax=None,nomax=None,autotype=True):
 	"""Reconstructs a directed acyclic graph according to prior information of edge significance.
 	This function first ranks all edges and introduce the most significant one by one, avoiding
 	those that would create a loop. Optional constraints on the maximum total number of edges,
@@ -36,6 +36,7 @@ def one_greedy(self,dp,namax=None,nimax=None,nomax=None):
 		network.
 	nomax:	Constraint on the maximum number of outgoing edges for each node in the reconstructed
 		network.
+	autotype:	Whether to automatically convert input data types to meet requirement.
 	Return:	dictionary with following keys:
 	ret:0 iff execution succeeded.
 	net:	numpy.ndarray((nt,nt),dtype=bool). The reconstructed direct acyclic graph or network
@@ -51,8 +52,14 @@ def one_greedy(self,dp,namax=None,nimax=None,nomax=None):
 	import numpy as np
 	from .auto import ftype_np
 	from .types import isint
-	if dp.dtype.char!=ftype_np:
-		raise ValueError('Wrong input dtype for prior matrix')
+	if autotype:
+		dp=dp.astype(ftype_np)
+		if namax is not None:
+			namax=int(namax)
+		if nimax is not None:
+			nimax=int(nimax)
+		if nomax is not None:
+			nomax=int(nomax)
 	if len(dp.shape)!=2:
 		raise ValueError('Wrong input shape')
 	if not (namax is None or isint(namax)):
@@ -62,13 +69,13 @@ def one_greedy(self,dp,namax=None,nimax=None,nomax=None):
 	if namax is None:
 		namax=-1
 	if not (nimax is None or isint(nimax)):
-		raise ValueError('Wrong nimax type')
+		raise ValueError('Wrong nimax type. Must be integer.')
 	if nimax is not None and nimax<=0:
 		raise ValueError('Input requires nimax>0.')
 	if nimax is None:
 		nimax=-1
 	if not (nomax is None or isint(nomax)):
-		raise ValueError('Wrong nomax type')
+		raise ValueError('Wrong nomax type. Must be integer.')
 	if nomax is not None and nomax<=0:
 		raise ValueError('Input requires nomax>0.')
 	if nomax is None:
@@ -89,33 +96,3 @@ def one_greedy(self,dp,namax=None,nimax=None,nomax=None):
 	ret=(ret==0)
 	ans={'ret':ret,'net':d}
 	return ans
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
